@@ -7,6 +7,9 @@ A new set of tools to assist in the development of variable fonts.
 2. VarGlyph Assistant
 3. Glyph Validator
 
+see also:
+
+4. [TempEdit](http://github.com/gferreira/tempedit)
 
 VarFont Assistant
 -----------------

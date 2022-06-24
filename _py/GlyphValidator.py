@@ -237,6 +237,7 @@ class GlyphValidator:
         tab2.glyphs.set(glyphNames)
 
 
+
 if __name__ == '__main__':
 
     OpenWindow(GlyphValidator)

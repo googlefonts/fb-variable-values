@@ -25,7 +25,8 @@ class VarFontAssistant:
         "designspace",
         "fontinfo",
         "glyphs",
-        "measurements"
+        "measurements",
+        "kerning"
     ]
 
     _designspaces     = {}
@@ -50,6 +51,9 @@ class VarFontAssistant:
     _glyphAttrs       = ['width', 'leftMargin', 'rightMargin']
     _glyphValues      = {}
 
+    _kerning          = {}
+    _kerningPairsAll  = {}
+
     def __init__(self):
         self.w = FloatingWindow(
                 (self.width, self.height), title=self.title,
@@ -62,6 +66,7 @@ class VarFontAssistant:
         self.initializeFontInfoTab()
         self.initializeMeasurementsTab()
         self.initializeGlyphsTab()
+        self.initializeKerningTab()
 
         self.w.open()
 
@@ -248,14 +253,14 @@ class VarFontAssistant:
         tab.exportValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'export',
-                # callback=self.visualizeFontinfoCallback,
+                # callback=self.exportFontinfoCallback,
             )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'save',
-                # callback=self.visualizeFontinfoCallback,
+                callback=self.saveFontinfoCallback,
             )
 
     def initializeGlyphsTab(self):
@@ -324,13 +329,71 @@ class VarFontAssistant:
         tab.exportValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'export',
-                # callback=self.visualizeFontinfoCallback,
+                # callback=self.exportFontinfoCallback,
             )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'save',
+                # callback=self.saveFontinfoCallback,
+            )
+
+    def initializeKerningTab(self):
+
+        tab = self._tabs['kerning']
+
+        x = p = self.padding
+        y = p/2
+        _colGlyphs = 280
+
+        tab.pairsLabel = TextBox(
+                (x, y, -p, self.lineHeight),
+                'pairs')
+
+        y += self.lineHeight + p/2
+        tab.pairs = List(
+                (x, y, _colGlyphs, -(self.lineHeight + p*2)),
+                [],
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=[{"title": t} for t in ['1st', '2nd']],
+                selectionCallback=self.selectKerningPairCallback,
+            )
+
+        y = p/2
+        x2 = x + _colGlyphs + p
+        tab.kerningValuesLabel = TextBox(
+                (x2, y, -p, self.lineHeight),
+                'kerning values')
+
+        y += self.lineHeight + p/2
+        tab.kerningValues = List(
+                (x2, y, -p, -(self.lineHeight + p*2)),
+                [],
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=[{"title": t, 'width': self._colFontName*1.5, 'minWidth': self._colFontName} if ti == 0 else {"title": t, 'width': self._colValue} for ti, t in enumerate(['file name', 'value'])],
+            )
+
+        y = -(self.lineHeight + p)
+        tab.updateValues = Button(
+                (x, y, self.buttonWidth, self.lineHeight),
+                'update',
+                callback=self.updateKerningCallback,
+            )
+
+        x += self.buttonWidth + p
+        tab.visualizeValues = Button(
+                (x, y, self.buttonWidth, self.lineHeight),
+                'visualize',
+                # callback=self.visualizeMeasurementsCallback,
+            )
+
+        x += self.buttonWidth + p
+        tab.exportValues = Button(
+                (x, y, self.buttonWidth, self.lineHeight),
+                'export',
                 # callback=self.visualizeFontinfoCallback,
             )
 
@@ -504,7 +567,7 @@ class VarFontAssistant:
         # --------------
 
         # get column descriptions
-        sourcesDescriptions = [{'title': 'file name', 'minWidth': self._colFontName*2}]
+        sourcesDescriptions  = [{'title': 'file name', 'minWidth': self._colFontName*2}]
         sourcesDescriptions += [{'title': axis.name, 'width': self._colValue} for axis in designspace.axes]
 
         # make list items
@@ -554,7 +617,7 @@ class VarFontAssistant:
             for a in self.selectedFontinfoAttrs:
                 aLabel = self._fontinfoAttrs[a]
                 aValue = info.get(a)
-                self._fontinfo[sourceFileName][aLabel] = aValue if aValue is not None else '—'
+                self._fontinfo[sourceFileName][aLabel] = aValue if aValue is not None else '–'
             f.close()
 
         # make list items
@@ -572,16 +635,55 @@ class VarFontAssistant:
             fontinfoPosSize, fontinfoItems,
             columnDescriptions=fontinfoDescriptions,
             allowsMultipleSelection=True,
+            allowsSorting=True,
+            editCallback=self.editFontInfoCallback,
             enableDelete=False)
 
     def visualizeFontinfoCallback(self, sender):
         print('visualize font infos')
 
+    def editFontInfoCallback(self, sender):
+        print('font info edited...')
+
     def exportFontinfoCallback(self, sender):
         pass
 
     def saveFontinfoCallback(self, sender):
-        pass
+
+        fontinfoAttrs = { v: k for k, v in self._fontinfoAttrs.items() }
+        
+        tab = self._tabs['fontinfo']
+
+        print('saving font info data to fonts...\n')
+        for item in tab.fontinfo.get():
+
+            sourceFileName = item['file name']
+            sourcePath = self._sources[sourceFileName]
+
+            f = OpenFont(sourcePath, showInterface=False)
+            fileChanged = False
+
+            for key, value in item.items():
+                if key == 'file name':
+                    continue
+                attr = fontinfoAttrs[key]
+                if type(value) not in [int, float]:
+                    try:
+                        value = float(value) if attr == 'italicAngle' else int(value)
+                    except:
+                        continue
+                if value == getattr(f.info, attr):
+                    continue
+                print(f'\t{sourceFileName}: writing {attr}: {getattr(f.info, attr)} (old) → {value} (new)')
+                setattr(f.info, attr, value)
+                if not fileChanged:
+                    fileChanged = True
+
+            if fileChanged:
+                f.save()
+            f.close()
+
+        print('\n...done.\n')
 
     # measurements
 
@@ -781,6 +883,54 @@ class VarFontAssistant:
     def saveGlyphValuesCallback(self, sender):
         pass
 
+    # kerning 
+
+    def updateKerningCallback(self, sender):
+
+        if not self.selectedSources:
+            return
+
+        tab = self._tabs['kerning']
+        
+        # reset list
+        # ...clear all items in list...
+
+        # collect pairs and kerning values
+        allPairs = []
+        self._kerning = {}
+        for source in self.selectedSources:
+            sourceFileName = source['file name']
+            sourcePath = self._sources[sourceFileName]
+            f = OpenFont(sourcePath, showInterface=False)
+            allPairs += f.kerning.keys()
+            self._kerning[sourceFileName] = {}
+            for pair, value in f.kerning.items():
+                self._kerning[sourceFileName][pair] = value
+
+        # store all pairs
+        self._kerningPairsAll = list(set(allPairs))
+        self._kerningPairsAll.sort()
+
+        # populate left column
+        pairListItems = []
+        for g1, g2 in sorted(self._kerningPairsAll):
+            pairItem = {'1st': g1, '2nd': g2}
+            pairListItems.append(pairItem)
+        tab.pairs.set(pairListItems)
+
+    def selectKerningPairCallback(self, sender):
+        i = sender.getSelection()[0]
+        selectedPair = self._kerningPairsAll[i]
+        kerningListItems = []
+        for fontName in self._kerning.keys():
+            kerningItem = {"file name": fontName}
+            if selectedPair in self._kerning[fontName]:
+                kerningItem['value'] = self._kerning[fontName][selectedPair]
+            else:
+                kerningItem['value'] = ' '
+            kerningListItems.append(kerningItem)
+        tab = self._tabs['kerning']
+        tab.kerningValues.set(kerningListItems)
 
 
 if __name__ == '__main__':

@@ -18,7 +18,8 @@ def getSegmentTypes(glyph):
             segments.append(segmentType)
         # segments.append(' ')
     return segments
-    
+
+
 class VarGlyphAssistant:
     
     title        = 'VarGlyph Assistant'
@@ -216,10 +217,14 @@ class VarGlyphAssistant:
 
         y += self.lineHeight + p/2
         tab.segments = List(
-                (x2, y, -p, -(self.lineHeight + p*2)),
+                (x2, y, -p, -(self.lineHeight*2 + p*5)),
                 [],
                 # columnDescriptions=[{"title": t} for t in ['file name'] + list(range(9))],
             )
+
+        y = -(self.lineHeight*2 + p*4)
+        tab.box = Box((x2, y, -p, self.lineHeight+p*2))
+        tab.box.text = TextBox((p, p/2, -p, self.lineHeight), "")
 
         y = -(self.lineHeight + p)
         tab.updateValues = Button(
@@ -476,7 +481,7 @@ class VarGlyphAssistant:
                         value = len(g.components)
                     self._glyphAttributes[sourceFileName][glyphName][attr] = value
 
-            f.close()
+            # f.close()
 
         tab.glyphs.set(glyphNames)
         tab.glyphs.setSelection([0])
@@ -518,7 +523,7 @@ class VarGlyphAssistant:
                 segments = getSegmentTypes(g)
                 self._glyphCompatibility[sourceFileName][glyphName] = segments
 
-            f.close()
+            # f.close()
 
         tab.glyphs.set(glyphNames)
         tab.glyphs.setSelection([0])
@@ -539,12 +544,17 @@ class VarGlyphAssistant:
                 sMax = len(segmentsGlyph)
 
         listItems = []
+        segmentsGlyphs = []
         for sourceFileName in self._glyphCompatibility:
             listItem = { 'file name' : sourceFileName }
             segmentsGlyph = self._glyphCompatibility[sourceFileName][glyphName]
             for si, segment in enumerate(segmentsGlyph):
                 listItem[str(si)] = segment
             listItems.append(listItem)
+            segmentsGlyphs.append(segmentsGlyph)
+
+        for S in segmentsGlyphs:
+            print(S)
 
         segmentsDescriptions  = [{'title': 'file name', 'minWidth': self._colFontName, 'width': self._colFontName*1.5}]
         segmentsDescriptions += [{'title': str(i), 'width': 20} for i in range(sMax)]

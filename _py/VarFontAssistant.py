@@ -1,4 +1,6 @@
+import AppKit
 import os, csv
+from operator import itemgetter, attrgetter
 from vanilla import *
 from AppKit import NSFilenamesPboardType, NSDragOperationCopy
 from mojo.roboFont import OpenWindow
@@ -30,7 +32,10 @@ class VarFontAssistant:
     ]
 
     _designspaces     = {}
+
     _axes             = {}
+    _axesTitles       = ['name', 'tag', 'minimum', 'maximum', 'default']
+
     _sources          = {}
     
     _measurementFiles = {}
@@ -68,6 +73,7 @@ class VarFontAssistant:
         self.initializeGlyphsTab()
         self.initializeKerningTab()
 
+        self.w.getNSWindow().setTitlebarAppearsTransparent_(True)
         self.w.open()
 
     # initialize UI
@@ -103,9 +109,18 @@ class VarFontAssistant:
                 'axes')
 
         y += self.lineHeight + p/2
+        axesDescriptions = [{"title": D} for D in self._axesTitles]
         tab.axes = List(
                 (x, y, -p, self.lineHeight*5),
                 [],
+                drawFocusRing=False,
+                editCallback=self.editAxesCallback,
+                selfDropSettings=dict(type="genericListPboardType",
+                        operation=AppKit.NSDragOperationMove,
+                        callback=self.genericDropSelfCallback),
+                dragSettings=dict(type="genericListPboardType",
+                        callback=self.genericDragCallback),
+                columnDescriptions=axesDescriptions,
             )
 
         y += self.lineHeight*5 + p
@@ -358,7 +373,7 @@ class VarFontAssistant:
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
                 columnDescriptions=[{"title": t} for t in ['1st', '2nd']],
-                selectionCallback=self.selectKerningPairCallback,
+                selectionCallback=self.updateKerningValuesCallback,
             )
 
         y = p/2
@@ -374,7 +389,9 @@ class VarFontAssistant:
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
                 columnDescriptions=[{"title": t, 'width': self._colFontName*1.5, 'minWidth': self._colFontName} if ti == 0 else {"title": t, 'width': self._colValue} for ti, t in enumerate(['file name', 'value'])],
-            )
+                allowsSorting=False,
+                editCallback=self.editKerningCallback,
+                enableDelete=False)
 
         y = -(self.lineHeight + p)
         tab.updateValues = Button(
@@ -387,14 +404,21 @@ class VarFontAssistant:
         tab.visualizeValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'visualize',
-                # callback=self.visualizeMeasurementsCallback,
+                callback=self.visualizeKerningCallback,
             )
 
         x += self.buttonWidth + p
         tab.exportValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'export',
-                # callback=self.visualizeFontinfoCallback,
+                callback=self.exportKerningCallback,
+            )
+
+        x = -(p + self.buttonWidth)
+        tab.saveValues = Button(
+                (x, y, self.buttonWidth, self.lineHeight),
+                'save',
+                callback=self.saveKerningCallback,
             )
 
     # -------------
@@ -483,6 +507,14 @@ class VarFontAssistant:
             return
         return selectedGlyphAttrs
 
+    # kerning
+
+    @property
+    def selectedKerningPair(self):
+        tab = self._tabs['kerning']
+        i = tab.pairs.getSelection()[0]
+        return self._kerningPairsAll[i]
+
     # ---------
     # callbacks
     # ---------
@@ -518,9 +550,7 @@ class VarFontAssistant:
         # reset lists
         # -----------
 
-        axesPosSize    = tab.axes.getPosSize()
         sourcesPosSize = tab.sources.getPosSize()
-        del tab.axes
         del tab.sources
 
         # -----------
@@ -528,7 +558,7 @@ class VarFontAssistant:
         # -----------
 
         if not self.selectedDesignspace:
-            tab.axes    = List(axesPosSize, [])
+            tab.axes.set([])
             tab.sources = List(sourcesPosSize, [])
             return
 
@@ -541,26 +571,16 @@ class VarFontAssistant:
         # -----------
         # update axes
         # -----------
-
-        # get column descriptions
-        axesTitles  = ['name', 'tag', 'minimum', 'maximum', 'default']
-        axesDescriptions = [{"title": D} for D in axesTitles]
         
         # make list items
         self._axes = {}
         axesItems = []
         for axis in designspace.axes:
-            axisItem = { attr : getattr(axis, attr) for attr in axesTitles }
+            axisItem = { attr : getattr(axis, attr) for attr in self._axesTitles }
             axesItems.append(axisItem)
 
         # create list UI with sources
-        tab.axes = List(
-            axesPosSize, axesItems,
-                columnDescriptions=axesDescriptions,
-                allowsMultipleSelection=True,
-                enableDelete=False,
-                allowsEmptySelection=False,
-            )
+        tab.axes.set(axesItems)
 
         # --------------
         # update sources
@@ -587,6 +607,48 @@ class VarFontAssistant:
             columnDescriptions=sourcesDescriptions,
             allowsMultipleSelection=True,
             enableDelete=False)
+
+    def editAxesCallback(self, sender):
+
+        # tab = self._tabs['designspace']
+        # axesOrder = [ a['name'] for a in tab.axes.get() ]
+        
+        # if not hasattr(tab, 'sources'):
+        #     return
+
+        # _sourceItems = tab.sources.get()
+        # sourceItems = []
+        # for item in _sourceItems:
+        #     D = {}
+        #     for k, v in item.items():
+        #         D[k] = v
+        #     sourceItems.append(D)
+
+        # print(sourceItems)
+        # sourceItems = sorted(sourceItems, key=attrgetter(*axesOrder))
+        # print(sourceItems)
+        # tab.sources.set(sourceItems)
+        pass
+
+    def genericDragCallback(self, sender, indexes):
+        return indexes
+
+    def genericDropSelfCallback(self, sender, dropInfo):
+        isProposal = dropInfo["isProposal"]
+        if not isProposal:
+            indexes = [int(i) for i in sorted(dropInfo["data"])]
+            indexes.sort()
+            rowIndex = dropInfo["rowIndex"]
+            items = sender.get()
+            toMove = [items[index] for index in indexes]
+            for index in reversed(indexes):
+                del items[index]
+            rowIndex -= len([index for index in indexes if index < rowIndex])
+            for font in toMove:
+                items.insert(rowIndex, font)
+                rowIndex += 1
+            sender.set(items)
+        return True
 
     # fontinfo
 
@@ -650,13 +712,13 @@ class VarFontAssistant:
 
     def saveFontinfoCallback(self, sender):
 
-        fontinfoAttrs = { v: k for k, v in self._fontinfoAttrs.items() }
-        
         tab = self._tabs['fontinfo']
+        fontinfoAttrs = { v: k for k, v in self._fontinfoAttrs.items() }
 
-        print('saving font info data to fonts...\n')
+        if self.verbose:
+            print('saving font info data to fonts...\n')
+
         for item in tab.fontinfo.get():
-
             sourceFileName = item['file name']
             sourcePath = self._sources[sourceFileName]
 
@@ -885,17 +947,46 @@ class VarFontAssistant:
 
     # kerning 
 
-    def updateKerningCallback(self, sender):
+    def updateKerningValuesCallback(self, sender):
+        '''
+        Update table with sources and kerning values based on the currently selected kerning pair.
 
+        '''
+        tab = self._tabs['kerning']
+
+        if not self.selectedSources:
+            tab.kerningValues.set([])
+            return
+
+        pair = self.selectedKerningPair
+
+        if self.verbose:
+            print(f'updating kerning values for pair {pair}...')
+
+        # create list items
+        kerningListItems = []
+        for fontName in self._kerning.keys():
+            kerningItem = {"file name": fontName}
+            if pair in self._kerning[fontName]:
+                kerningItem['value'] = self._kerning[fontName][pair]
+            else:
+                kerningItem['value'] = ' '
+            kerningListItems.append(kerningItem)
+
+        # set kerning values in table
+        tab.kerningValues.set(kerningListItems)
+
+    def updateKerningCallback(self, sender):
+        '''
+        Read kerning pairs and values from selected sources and update UI.
+
+        '''
         if not self.selectedSources:
             return
 
         tab = self._tabs['kerning']
         
-        # reset list
-        # ...clear all items in list...
-
-        # collect pairs and kerning values
+        # collect pairs and kerning values in selected fonts
         allPairs = []
         self._kerning = {}
         for source in self.selectedSources:
@@ -907,31 +998,76 @@ class VarFontAssistant:
             for pair, value in f.kerning.items():
                 self._kerning[sourceFileName][pair] = value
 
-        # store all pairs
+        # store all pairs in dict
         self._kerningPairsAll = list(set(allPairs))
         self._kerningPairsAll.sort()
 
-        # populate left column
+        # update pairs column
         pairListItems = []
         for g1, g2 in sorted(self._kerningPairsAll):
             pairItem = {'1st': g1, '2nd': g2}
             pairListItems.append(pairItem)
         tab.pairs.set(pairListItems)
 
-    def selectKerningPairCallback(self, sender):
-        i = sender.getSelection()[0]
-        selectedPair = self._kerningPairsAll[i]
-        kerningListItems = []
-        for fontName in self._kerning.keys():
-            kerningItem = {"file name": fontName}
-            if selectedPair in self._kerning[fontName]:
-                kerningItem['value'] = self._kerning[fontName][selectedPair]
-            else:
-                kerningItem['value'] = ' '
-            kerningListItems.append(kerningItem)
+    def editKerningCallback(self, sender):
+        # save edited kerning pair to dict
         tab = self._tabs['kerning']
-        tab.kerningValues.set(kerningListItems)
+        selection = tab.kerningValues.getSelection()
+        if not len(selection):
+            return
+        i = selection[0]
+        item = tab.kerningValues.get()[i]
+        # save change to internal dict
+        pair     = self.selectedKerningPair
+        fontName = item['file name']
+        newValue = item['value']
+        oldValue = self._kerning[fontName].get(pair)
+        if oldValue != newValue:
+            if self.verbose:
+                print(f'changed kerning pair {pair} in {fontName}: {oldValue} → {newValue}')
+            self._kerning[fontName][pair] = newValue
 
+    def visualizeKerningCallback(self, sender):
+        if self.verbose:
+            print('visualize kerning...\n')
+
+    def exportKerningCallback(self, sender):
+        if self.verbose:
+            print('export kerning...\n')
+
+    def saveKerningCallback(self, sender):
+
+        tab = self._tabs['kerning']
+
+        if self.verbose:
+            print('saving kerning data to fonts...\n')
+
+        for fontName in self._kerning.keys():
+            sourcePath = self._sources[fontName]
+            f = OpenFont(sourcePath, showInterface=False)
+            fontChanged = False
+            for pair, newValue in self._kerning[fontName].items():
+                newValue = int(newValue)
+                oldValue = f.kerning.get(pair)
+                if newValue != oldValue:
+                    if self.verbose:
+                        print(f'\twriting new value for {pair} in {fontName}: {oldValue} → {newValue}')
+                    f.kerning[pair] = newValue
+                    if not fontChanged:
+                        fontChanged = True
+            if fontChanged:
+                if self.verbose:
+                    print(f'\tsaving {fontName}...')
+                f.save()
+            f.close()
+
+        if self.verbose:
+            print('\n...done.\n')
+
+
+# ----
+# test
+# ----
 
 if __name__ == '__main__':
 

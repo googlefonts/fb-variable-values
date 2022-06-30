@@ -1,0 +1,28 @@
+title: VarTools user documentation
+email: gustavo@hipertipo.com
+description: VarTools user documentation
+baseurl: ""
+url: https://gferreira.github.io/vartools/
+
+markdown: kramdown
+
+collections:
+  topics:
+    output: true
+    permalink: /:path/
+  reference:
+    output: true
+    permalink: /:path/
+
+version: 0.1
+
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - Gemfile
+  - Gemfile.lock
+
+jekyll_tidy:
+  exclude: []
+  # ignore_env: development
+  compress_html: false

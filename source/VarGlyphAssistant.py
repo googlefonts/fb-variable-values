@@ -22,28 +22,28 @@ def getSegmentTypes(glyph):
 
 class VarGlyphAssistant:
     
-    title        = 'VarGlyph Assistant'
-    key          = 'com.hipertipo.varGlyphAssistant'
-    width        = 123*5
-    height       = 640
-    padding      = 10
-    lineHeight   = 22
-    verbose      = True
-    buttonWidth  = 100
+    title         = 'VarGlyph Assistant'
+    key           = 'com.hipertipo.varGlyphAssistant'
+    width         = 123*5
+    height        = 640
+    padding       = 10
+    lineHeight    = 22
+    verbose       = True
+    buttonWidth   = 100
 
-    _colGlyphs   = 100
-    _colFontName = 240
-    _colValue    = 80
+    _colGlyphs    = 100
+    _colFontName  = 240
+    _colValue     = 80
 
-    _tabsTitles = [
+    _tabsTitles   = [
         'designspace',
         'attributes',
         'compatibility',
         'validation',
     ]
 
-    _designspaces     = {}
-    _sources          = {}
+    _designspaces = {}
+    _sources      = {}
 
     _glyphAttributes       = {}
     _glyphAttributesLabels = [

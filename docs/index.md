@@ -28,7 +28,7 @@ Reference
 - [VarGlyph Assistant](varglyph-assistant)
 - [Glyph Validator](glyph-validator)
 {% endcomment %}
-  </div>
+</div>
 
 <div class='col' markdown='1'>
 Development

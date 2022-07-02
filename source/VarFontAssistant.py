@@ -19,28 +19,15 @@ class VarFontAssistant:
     lineHeight        = 22
     verbose           = True
     buttonWidth       = 100
-
     _colFontName      = 240
     _colValue         = 80
-
-    _tabsTitles       = [
-        "designspace",
-        "fontinfo",
-        "glyphs",
-        "measurements",
-        "kerning"
-    ]
-
+    _tabsTitles       = ["designspace", "fontinfo", "glyphs", "measurements", "kerning"]
     _designspaces     = {}
-
     _axes             = {}
     _axesTitles       = ['name', 'tag', 'minimum', 'maximum', 'default']
-
     _sources          = {}
-    
     _measurementFiles = {}
     _measurements     = {}
-
     _fontinfoAttrs    = {
         'unitsPerEm'             : 'unitsPerEm',
         'xHeight'                : 'xHeight',
@@ -52,15 +39,13 @@ class VarFontAssistant:
         'openTypeOS2WidthClass'  : 'OS2 width',
     }
     _fontinfo         = {}
-
     _glyphAttrs       = ['width', 'leftMargin', 'rightMargin']
     _glyphValues      = {}
-
     _kerning          = {}
     _kerningPairsAll  = {}
 
     def __init__(self):
-        self.w = FloatingWindow(
+        self.w = Window(
                 (self.width, self.height), title=self.title,
                 minSize=(self.width, 360))
 
@@ -383,13 +368,29 @@ class VarFontAssistant:
                 'kerning values')
 
         y += self.lineHeight + p/2
+        columnDescriptions = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", maxValue=99),
+            },
+        ]
         tab.kerningValues = List(
                 (x2, y, -p, -(self.lineHeight + p*2)),
                 [],
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
-                columnDescriptions=[{"title": t, 'width': self._colFontName*1.5, 'minWidth': self._colFontName} if ti == 0 else {"title": t, 'width': self._colValue} for ti, t in enumerate(['file name', 'value'])],
-                allowsSorting=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
                 editCallback=self.editKerningCallback,
                 enableDelete=False)
 
@@ -397,7 +398,7 @@ class VarFontAssistant:
         tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'update',
-                callback=self.updateKerningCallback,
+                callback=self.updateKerningPairsCallback,
             )
 
         x += self.buttonWidth + p
@@ -453,6 +454,11 @@ class VarFontAssistant:
         designspace = DesignSpaceDocument()
         designspace.read(designspacePath)
         return designspace
+
+    @property
+    def sources(self):
+        tab = self._tabs['designspace']
+        return tab.sources.get()
 
     @property
     def selectedSources(self):
@@ -513,7 +519,7 @@ class VarFontAssistant:
     def selectedKerningPair(self):
         tab = self._tabs['kerning']
         i = tab.pairs.getSelection()[0]
-        return self._kerningPairsAll[i]
+        return self._kerningPairsAll[i], i
 
     # ---------
     # callbacks
@@ -609,7 +615,6 @@ class VarFontAssistant:
             enableDelete=False)
 
     def editAxesCallback(self, sender):
-
         # tab = self._tabs['designspace']
         # axesOrder = [ a['name'] for a in tab.axes.get() ]
         
@@ -947,36 +952,7 @@ class VarFontAssistant:
 
     # kerning 
 
-    def updateKerningValuesCallback(self, sender):
-        '''
-        Update table with sources and kerning values based on the currently selected kerning pair.
-
-        '''
-        tab = self._tabs['kerning']
-
-        if not self.selectedSources:
-            tab.kerningValues.set([])
-            return
-
-        pair = self.selectedKerningPair
-
-        if self.verbose:
-            print(f'updating kerning values for pair {pair}...')
-
-        # create list items
-        kerningListItems = []
-        for fontName in self._kerning.keys():
-            kerningItem = {"file name": fontName}
-            if pair in self._kerning[fontName]:
-                kerningItem['value'] = self._kerning[fontName][pair]
-            else:
-                kerningItem['value'] = ' '
-            kerningListItems.append(kerningItem)
-
-        # set kerning values in table
-        tab.kerningValues.set(kerningListItems)
-
-    def updateKerningCallback(self, sender):
+    def updateKerningPairsCallback(self, sender):
         '''
         Read kerning pairs and values from selected sources and update UI.
 
@@ -1009,23 +985,71 @@ class VarFontAssistant:
             pairListItems.append(pairItem)
         tab.pairs.set(pairListItems)
 
+    def updateKerningValuesCallback(self, sender):
+        '''
+        Update table with sources and kerning values based on the currently selected kerning pair.
+
+        '''
+        tab = self._tabs['kerning']
+
+        if not self.selectedSources:
+            tab.kerningValues.set([])
+            return
+
+        pair, pairIndex = self.selectedKerningPair
+
+        if self.verbose:
+            print(f'updating kerning values for pair {pair} ({pairIndex})...\n')
+
+        # create list items
+        kerningListItems = []
+        for fontName in self._kerning.keys():
+            value = self._kerning[fontName][pair] if pair in self._kerning[fontName] else 0
+            listItem = {
+                "file name" : fontName,
+                "value"     : value,
+                "level"     : abs(value),
+            }
+            kerningListItems.append(listItem)
+
+        # set kerning values in table
+        tab.kerningValues.set(kerningListItems)
+
     def editKerningCallback(self, sender):
-        # save edited kerning pair to dict
+        '''
+        Save the edited kerning pair back to the dict, so we can load values for another pair.
+
+        '''
         tab = self._tabs['kerning']
         selection = tab.kerningValues.getSelection()
         if not len(selection):
             return
+
         i = selection[0]
         item = tab.kerningValues.get()[i]
+
         # save change to internal dict
-        pair     = self.selectedKerningPair
+        pair, pairIndex = self.selectedKerningPair
         fontName = item['file name']
         newValue = item['value']
         oldValue = self._kerning[fontName].get(pair)
         if oldValue != newValue:
             if self.verbose:
-                print(f'changed kerning pair {pair} in {fontName}: {oldValue} → {newValue}')
-            self._kerning[fontName][pair] = newValue
+                print(f'changed kerning pair {pair} in {fontName}: {oldValue} → {newValue}\n')
+            self._kerning[fontName][pair] = int(newValue)
+
+        # update level indicator
+        ### this will crash RF
+        # kerningListItems = []
+        # for fontName in self._kerning.keys():
+        #     value = self._kerning[fontName][pair] if pair in self._kerning[fontName] else 0
+        #     listItem = {
+        #         "file name" : fontName,
+        #         "value"     : value,
+        #         "level"     : abs(value),
+        #     }
+        #     kerningListItems.append(listItem)
+        # tab.kerningValues.set(kerningListItems)
 
     def visualizeKerningCallback(self, sender):
         if self.verbose:
@@ -1047,6 +1071,9 @@ class VarFontAssistant:
             f = OpenFont(sourcePath, showInterface=False)
             fontChanged = False
             for pair, newValue in self._kerning[fontName].items():
+                if type(newValue) not in [int, float]:
+                    if not len(newValue.strip()):
+                        continue
                 newValue = int(newValue)
                 oldValue = f.kerning.get(pair)
                 if newValue != oldValue:
@@ -1056,8 +1083,8 @@ class VarFontAssistant:
                     if not fontChanged:
                         fontChanged = True
             if fontChanged:
-                if self.verbose:
-                    print(f'\tsaving {fontName}...')
+                # if self.verbose:
+                #     print(f'\tsaving {fontName}...')
                 f.save()
             f.close()
 

@@ -24,8 +24,10 @@ Reference
 ---------
 
 - [VarFont Assistant](varfont-assistant)
+{% comment %}
 - [VarGlyph Assistant](varglyph-assistant)
 - [Glyph Validator](glyph-validator)
+{% endcomment %}
 </div>
 
 <div class='col' markdown='1'>

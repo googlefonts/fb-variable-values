@@ -13,7 +13,7 @@ class VarFontAssistant:
     
     title             = 'VarFont Assistant'
     key               = 'com.hipertipo.varFontAssistant'
-    width             = 123*4
+    width             = 123*5
     height            = 640
     padding           = 10
     lineHeight        = 22
@@ -21,7 +21,7 @@ class VarFontAssistant:
     buttonWidth       = 100
     _colFontName      = 240
     _colValue         = 80
-    _tabsTitles       = ["designspace", "fontinfo", "glyphs", "measurements", "kerning"]
+    _tabsTitles       = ["designspace", "font info", "glyph metrics", "measurements", "kerning"]
     _designspaces     = {}
     _axes             = {}
     _axesTitles       = ['name', 'tag', 'minimum', 'maximum', 'default']
@@ -39,10 +39,13 @@ class VarFontAssistant:
         'openTypeOS2WidthClass'  : 'OS2 width',
     }
     _fontinfo         = {}
+
+    _glyphNamesAll    = []
     _glyphAttrs       = ['width', 'leftMargin', 'rightMargin']
     _glyphValues      = {}
+
+    _kerningPairsAll  = []
     _kerning          = {}
-    _kerningPairsAll  = {}
 
     def __init__(self):
         self.w = Window(
@@ -202,7 +205,7 @@ class VarFontAssistant:
 
     def initializeFontInfoTab(self):
 
-        tab = self._tabs['fontinfo']
+        tab = self._tabs['font info']
 
         x = p = self.padding
         y = p/2
@@ -265,57 +268,82 @@ class VarFontAssistant:
 
     def initializeGlyphsTab(self):
 
-        tab = self._tabs['glyphs']
+        tab = self._tabs['glyph metrics']
 
         x = p = self.padding
         y = p/2
-        
-        col = 120
+        col = 180
+        x2 = x + col + p
 
+        tab.glyphLabel = TextBox(
+                (x, y, col, self.lineHeight),
+                'glyphs')
+
+        tab.glyphCounter = TextBox(
+                (x, y, col, self.lineHeight),
+                '...',
+                alignment='right')
+
+        y += self.lineHeight + p/2
+        tab.glyphs = List(
+                (x, y, col, -(self.lineHeight + p*2)),
+                [],
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                selectionCallback=self.updateGlyphValuesCallback,
+            )
+
+        y = p/2
         tab.glyphAttrsLabel = TextBox(
-                (x, y, -p, self.lineHeight),
+                (x2, y, -p, self.lineHeight),
                 'glyph attributes')
 
         y += self.lineHeight + p/2
         tab.glyphAttrs = List(
-                (x, y, -p, self.lineHeight*5),
+                (x2, y, -p, self.lineHeight*3),
                 self._glyphAttrs,
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
-            )
-
-        y += self.lineHeight*5 + p
-        tab.glyphNamesLabel = TextBox(
-                (x, y, -p, self.lineHeight),
-                'glyph names')
-
-        y += self.lineHeight + p/2
-        tab.glyphNames = EditText(
-                (x, y, -p, self.lineHeight*3),
-                'A B C D a b c d zero one two three',
+                selectionCallback=self.updateGlyphValuesCallback,
             )
 
         y += self.lineHeight*3 + p
         tab.glyphsLabel = TextBox(
-                (x, y, -p, self.lineHeight),
+                (x2, y, -p, self.lineHeight),
                 'glyph values')
 
+        columnDescriptions = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", maxValue=1600),
+            },
+        ]
         y += self.lineHeight + p/2
         tab.glyphValues = List(
-                (x, y, -p, -(self.lineHeight + p*2)),
+                (x2, y, -p, -(self.lineHeight + p*2)),
                 [],
-                # allowsMultipleSelection=False,
-                # allowsEmptySelection=False,
-                # enableDelete=True,
-                # selectionCallback=self.selectMeasurementFileCallback,
-                # columnDescriptions=fontinfoDescriptions,
-            )
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
+                editCallback=self.editGlyphValueCallback,
+                enableDelete=False)
 
         y = -(self.lineHeight + p)
         tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'update',
-                callback=self.updateGlyphValuesCallback,
+                callback=self.updateGlyphAttributesCallback,
             )
 
         x += self.buttonWidth + p
@@ -351,6 +379,11 @@ class VarFontAssistant:
                 (x, y, -p, self.lineHeight),
                 'pairs')
 
+        tab.pairsCounter = TextBox(
+                (x, y, _colGlyphs, self.lineHeight),
+                '...',
+                alignment='right')
+
         y += self.lineHeight + p/2
         tab.pairs = List(
                 (x, y, _colGlyphs, -(self.lineHeight + p*2)),
@@ -381,7 +414,7 @@ class VarFontAssistant:
             {
                 "title"    : 'level',
                 'width'    : self._colValue*1.5,
-                'cell'     : LevelIndicatorListCell(style="continuous", maxValue=99),
+                'cell'     : LevelIndicatorListCell(style="continuous", maxValue=200),
             },
         ]
         tab.kerningValues = List(
@@ -474,7 +507,7 @@ class VarFontAssistant:
 
     @property
     def selectedFontinfoAttrs(self):
-        tab = self._tabs['fontinfo']
+        tab = self._tabs['font info']
         selection = tab.fontinfoAttrs.getSelection()
         fontinfoAttrs = tab.fontinfoAttrs.get()
         selectedFontinfoAttrs = [fontinfo for i, fontinfo in enumerate(fontinfoAttrs) if i in selection]
@@ -504,8 +537,14 @@ class VarFontAssistant:
     # glyph values
 
     @property
+    def selectedGlyphName(self):
+        tab = self._tabs['glyph metrics']
+        i = tab.glyphs.getSelection()[0]
+        return self._glyphNamesAll[i], i
+
+    @property
     def selectedGlyphAttrs(self):
-        tab = self._tabs['glyphs']
+        tab = self._tabs['glyph metrics']
         selection = tab.glyphAttrs.getSelection()
         glyphAttrs = tab.glyphAttrs.get()
         selectedGlyphAttrs = [a for i, a in enumerate(glyphAttrs) if i in selection]
@@ -662,7 +701,7 @@ class VarFontAssistant:
         if not self.selectedSources:
             return
 
-        tab = self._tabs['fontinfo']
+        tab = self._tabs['font info']
 
         # reset list
         fontinfoPosSize = tab.fontinfo.getPosSize()
@@ -717,7 +756,7 @@ class VarFontAssistant:
 
     def saveFontinfoCallback(self, sender):
 
-        tab = self._tabs['fontinfo']
+        tab = self._tabs['font info']
         fontinfoAttrs = { v: k for k, v in self._fontinfoAttrs.items() }
 
         if self.verbose:
@@ -888,58 +927,75 @@ class VarFontAssistant:
         pass
 
     # glyph values
-    
-    def updateGlyphValuesCallback(self, sender):
 
-        if not self.selectedGlyphAttrs:
-            return
+    def updateGlyphAttributesCallback(self, sender):
+        '''
+        Read glyph names and glyph values from selected sources and update UI.
 
-        self.selectedGlyphAttrs
+        '''
 
-        tab = self._tabs['glyphs']
+        tab = self._tabs['glyph metrics']
 
-        # reset list
-        glyphValuesPosSize = tab.glyphValues.getPosSize()
-        del tab.glyphValues
-
-        # empty list
-        if not self.selectedGlyphAttrs:
-            tab.glyphValues = List(glyphValuesPosSize, [])
-            return
-
-        glyphAttr  = self.selectedGlyphAttrs[0]
-        glyphNames = tab.glyphNames.get().split(' ')
-
-        # collect glyph values into dict
+        # collect glyph names and glyph values in selected fonts
+        allGlyphs = []
         self._glyphValues = {}
+    
         for source in self.selectedSources:
             sourceFileName = source['file name']
             sourcePath = self._sources[sourceFileName]
             f = OpenFont(sourcePath, showInterface=False)
-
+            allGlyphs += f.keys()
             self._glyphValues[sourceFileName] = {}
-            for glyphName in glyphNames:
-                value = getattr(f[glyphName], glyphAttr) 
-                self._glyphValues[sourceFileName][glyphName] = value
+            for glyphName in f.keys():
+                self._glyphValues[sourceFileName][glyphName] = {}
+                for attr in self._glyphAttrs:
+                    value = getattr(f[glyphName], attr)
+                    self._glyphValues[sourceFileName][glyphName][attr] = value
 
-            f.close()
+        # store all pairs in dict
+        self._glyphNamesAll = list(set(allGlyphs))
+        self._glyphNamesAll.sort()
 
-        # make list items
-        glyphValueItems = []
-        for sourceFileName in self._glyphValues.keys():
-            glyphValueItem = { 'file name' : sourceFileName }
-            for glyphName in self._glyphValues[sourceFileName].keys():
-                glyphValueItem[glyphName] = self._glyphValues[sourceFileName][glyphName]
-            glyphValueItems.append(glyphValueItem)
+        # update glyphs column
+        tab.glyphs.set(self._glyphNamesAll)
 
-        # create list UI with sources
-        glyphValuesDescriptions  = [{"title": 'file name', 'minWidth': self._colFontName}]
-        glyphValuesDescriptions += [{"title": gName, 'width': self._colValue} for gName in glyphNames]
-        tab.glyphValues = List(
-            glyphValuesPosSize, glyphValueItems,
-            columnDescriptions=glyphValuesDescriptions,
-            allowsMultipleSelection=True,
-            enableDelete=False)
+    def updateGlyphValuesCallback(self, sender):
+
+        tab = self._tabs['glyph metrics']
+
+        if not self.selectedSources:
+            tab.glyphValues.set([])
+            return
+
+        if not self.selectedGlyphAttrs:
+            return
+
+        glyphName, glyphIndex = self.selectedGlyphName
+        glyphAttr  = self.selectedGlyphAttrs[0]
+
+        if self.verbose:
+            print(f'updating glyph values for glyph {glyphName} ({glyphIndex})...\n')
+
+        # create list items
+        glyphValuesItems = []
+        for fontName in self._glyphValues.keys():
+            value = self._glyphValues[fontName][glyphName][glyphAttr] if glyphName in self._glyphValues[fontName] else 0
+            listItem = {
+                "file name" : fontName,
+                "value"     : value,
+                "level"     : abs(value),
+            }
+            glyphValuesItems.append(listItem)
+
+        # set kerning values in table
+        tab.glyphValues.set(glyphValuesItems)
+        
+        # update pairs list label
+        tab.glyphCounter.set(f'{glyphIndex+1} / {len(self._glyphNamesAll)}')
+
+    def editGlyphValueCallback(self, sender):
+        # print('editing glyph value...')
+        pass
 
     def visualizeGlyphValuesCallback(self, sender):
         pass
@@ -1014,6 +1070,9 @@ class VarFontAssistant:
 
         # set kerning values in table
         tab.kerningValues.set(kerningListItems)
+        
+        # update pairs list label
+        tab.pairsCounter.set(f'{pairIndex+1} / {len(self._kerningPairsAll)}')
 
     def editKerningCallback(self, sender):
         '''

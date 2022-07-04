@@ -182,19 +182,19 @@ class VarFontAssistant:
                 callback=self.updateMeasurementsCallback,
             )
 
-        x += self.buttonWidth + p
-        tab.visualizeValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'visualize',
-                callback=self.visualizeMeasurementsCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.visualizeValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'visualize',
+        #         callback=self.visualizeMeasurementsCallback,
+        #     )
 
-        x += self.buttonWidth + p
-        tab.exportValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'export',
-                # callback=self.visualizeFontinfoCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.exportValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'export',
+        #         # callback=self.visualizeFontinfoCallback,
+        #     )
 
         # x = -(p + self.buttonWidth)
         # tab.saveValues = Button(
@@ -245,19 +245,19 @@ class VarFontAssistant:
                 callback=self.updateFontinfoCallback,
             )
 
-        x += self.buttonWidth + p
-        tab.visualizeValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'visualize',
-                callback=self.visualizeFontinfoCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.visualizeValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'visualize',
+        #         callback=self.visualizeFontinfoCallback,
+        #     )
 
-        x += self.buttonWidth + p
-        tab.exportValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'export',
-                # callback=self.exportFontinfoCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.exportValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'export',
+        #         # callback=self.exportFontinfoCallback,
+        #     )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
@@ -344,19 +344,19 @@ class VarFontAssistant:
                 callback=self.updateGlyphAttributesCallback,
             )
 
-        x += self.buttonWidth + p
-        tab.visualizeValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'visualize',
-                # callback=self.visualizeFontinfoCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.visualizeValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'visualize',
+        #         # callback=self.visualizeFontinfoCallback,
+        #     )
 
-        x += self.buttonWidth + p
-        tab.exportValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'export',
-                # callback=self.exportFontinfoCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.exportValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'export',
+        #         # callback=self.exportFontinfoCallback,
+        #     )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
@@ -432,19 +432,19 @@ class VarFontAssistant:
                 callback=self.updateKerningPairsCallback,
             )
 
-        x += self.buttonWidth + p
-        tab.visualizeValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'visualize',
-                callback=self.visualizeKerningCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.visualizeValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'visualize',
+        #         callback=self.visualizeKerningCallback,
+        #     )
 
-        x += self.buttonWidth + p
-        tab.exportValues = Button(
-                (x, y, self.buttonWidth, self.lineHeight),
-                'export',
-                callback=self.exportKerningCallback,
-            )
+        # x += self.buttonWidth + p
+        # tab.exportValues = Button(
+        #         (x, y, self.buttonWidth, self.lineHeight),
+        #         'export',
+        #         callback=self.exportKerningCallback,
+        #     )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(

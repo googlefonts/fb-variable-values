@@ -290,8 +290,7 @@ class VarFontAssistant:
                 [],
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
-                selectionCallback=self.updateGlyphValuesCallback,
-            )
+                selectionCallback=self.updateGlyphValuesCallback)
 
         y = p/2
         tab.glyphAttrsLabel = TextBox(
@@ -304,8 +303,7 @@ class VarFontAssistant:
                 self._glyphAttrs,
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
-                selectionCallback=self.updateGlyphValuesCallback,
-            )
+                selectionCallback=self.updateGlyphValuesCallback)
 
         y += self.lineHeight*3 + p
         tab.glyphsLabel = TextBox(
@@ -977,6 +975,7 @@ class VarFontAssistant:
             print(f'updating glyph values for glyph {glyphName} ({glyphIndex})...\n')
 
         # create list items
+        values = []
         glyphValuesItems = []
         for fontName in self._glyphValues.keys():
             value = self._glyphValues[fontName][glyphName][glyphAttr] if glyphName in self._glyphValues[fontName] else 0
@@ -986,10 +985,39 @@ class VarFontAssistant:
                 "level"     : abs(value),
             }
             glyphValuesItems.append(listItem)
+            values.append(value)
 
-        # set kerning values in table
-        tab.glyphValues.set(glyphValuesItems)
-        
+        # set glyph values in table
+        # tab.glyphValues.set(glyphValuesItems)
+        glyphValuesPosSize = tab.glyphValues.getPosSize()
+        del tab.glyphValues
+
+        columnDescriptions = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", minValue=min(values), maxValue=max(values)),
+            },
+        ]
+        tab.glyphValues = List(
+                glyphValuesPosSize,
+                glyphValuesItems,
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
+                editCallback=self.editGlyphValueCallback,
+                enableDelete=False)
+
         # update pairs list label
         tab.glyphCounter.set(f'{glyphIndex+1} / {len(self._glyphNamesAll)}')
 

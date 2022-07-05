@@ -21,17 +21,17 @@ Define which designspaces and font sources to look into.
 
 <div class='col-sm' markdown='1'>
 designspaces
-: Drag one or more `.designspace` files into the list.
+: Drag one or more designspace files into the list.
 
 axes
 : ^
   A list of axes in the selected designspace.  
-  Reorder the list items to change the font sorting order.†
+  {% comment %}Reorder the list items to change the font sorting order.{% endcomment %}
 
 sources
 : ^
-  A list of sources in the selected designspace.  
-  Click on the column headers to sort the list using different parameters.  
+  A list of all sources in the selected designspace.  
+  Click on the column headers to sort the list based on different axes.  
   Select which sources to collect values from.
 </div>
 
@@ -51,24 +51,26 @@ Visualize and edit font values in selected sources.
 
 <div class='col-sm' markdown='1'>
 attributes
-: A list of font attributes to measure.
-
-values
-: Double-click table cells to edit individual values.
+: A list of font attributes to collect values from.
 
 load
-: Use the *load* button to scan the fonts, collect values and display them in the UI.
+: Click the button to collect values from the fonts and display them in the UI.
 
-<!--
+values
+: ^
+  Values and visualization of the selected font attribute across all selected sources.  
+  Double-click individual values to edit.
+
+{% comment %}
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the table as a CSV file.†
--->
+{% endcomment %}
 
 save
-: Use the *save* button to save the edited values back into the fonts.
+: Click the button to save the edited values back into the fonts.
 </div>
 
 </div>
@@ -77,7 +79,7 @@ save
 glyph values
 ------------
 
-Visualize and edit glyph values in selected sources.
+Visualize and edit glyph values to collect values from.
 
 <div class='row'>
 
@@ -90,24 +92,26 @@ glyphs
 : A list of all glyphs in all selected sources.
 
 attributes
-: A list of glyph attributes to measure.
-
-values
-: Double-click table cells to edit individual values.
+: A list of glyph attributes to collect values from.
 
 load
-: Click the *load* button to scan the fonts, collect values and display them in the UI.
+: Click the button to collect values from the fonts and display them in the UI.
 
-<!--
+values
+: ^
+  Values and visualization of the selected glyph attribute across all selected sources.  
+  Double-click individual values to edit.
+
+{% comment %}
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the table as a CSV file.†
--->
+{% endcomment %}
 
 save
-: Use the *save* button to save the edited values back into the fonts.†
+: Click the button to save the edited values back into the fonts.
 </div>
 
 </div>
@@ -135,10 +139,11 @@ measurements
   Select one or more items to measure.
 
 values
-: A list of measured values for the selected sources.†
+: ^
+  Values and visualization of the selected measurement across all selected sources.  
+  A list of measured values for the selected sources.†
 
-load
-: Click the *load* button to scan the fonts, collect values and display them in the UI.
+: Click the button to collect values from the fonts and display them in the UI.
 
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
@@ -166,24 +171,24 @@ Visualize and edit kerning values in selected sources.
 pairs
 : A list of all kerning pairs in all selected sources.
 
-values
-: Values of the selected kerning pair across all selected sources.
-
 load
-: Click the *load* button to scan the fonts, collect values and display them in the UI.
+: Click the button to collect values from the fonts and display them in the UI.
 
-<!--
+values
+: ^
+  Values and visualization of the selected kerning pair across all selected sources.  
+  Double-click individual values to edit.
+
+{% comment %}
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the kerning data as a CSV file.†
--->
+{% endcomment %}
 
 save
-: Use the *save* button to save the edited values back into the fonts.
+: Click the button to save the edited values back into the fonts.
 </div>
 
 </div>
-
-† not implemented yet

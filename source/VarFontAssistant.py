@@ -43,7 +43,6 @@ class VarFontAssistant:
     _glyphNamesAll    = []
     _glyphAttrs       = ['width', 'leftMargin', 'rightMargin']
     _glyphValues      = {}
-
     _kerningPairsAll  = []
     _kerning          = {}
 
@@ -119,15 +118,7 @@ class VarFontAssistant:
         y += self.lineHeight + p/2
         tab.sources = List(
                 (x, y, -p, -(self.lineHeight + p*2)),
-                [],
-            )
-
-        # y = -(self.lineHeight + p)
-        # tab.updateValues = Button(
-        #         (x, y, self.buttonWidth, self.lineHeight),
-        #         'update all',
-        #         # callback=self.updateFontInfoCallback,
-        #     )
+                [])
 
     def initializeMeasurementsTab(self):
 
@@ -176,10 +167,10 @@ class VarFontAssistant:
             )
 
         y = -(self.lineHeight + p)
-        tab.updateValues = Button(
+        tab.loadValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.updateMeasurementsCallback,
+                callback=self.loadMeasurementsCallback,
             )
 
         # x += self.buttonWidth + p
@@ -261,7 +252,7 @@ class VarFontAssistant:
         tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.updateFontInfoCallback,
+                callback=self.loadFontInfoCallback,
             )
 
         # x += self.buttonWidth + p
@@ -300,7 +291,7 @@ class VarFontAssistant:
 
         tab.glyphCounter = TextBox(
                 (x, y, col, self.lineHeight),
-                '...',
+                '',
                 alignment='right')
 
         y += self.lineHeight + p/2
@@ -357,10 +348,10 @@ class VarFontAssistant:
                 enableDelete=False)
 
         y = -(self.lineHeight + p)
-        tab.updateValues = Button(
+        tab.loadValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.updateGlyphAttributesCallback,
+                callback=self.loadGlyphAttributesCallback,
             )
 
         # x += self.buttonWidth + p
@@ -397,7 +388,7 @@ class VarFontAssistant:
 
         tab.pairsCounter = TextBox(
                 (x, y, col, self.lineHeight),
-                '...',
+                '',
                 alignment='right')
 
         y += self.lineHeight + p/2
@@ -444,10 +435,10 @@ class VarFontAssistant:
                 enableDelete=False)
 
         y = -(self.lineHeight + p)
-        tab.updateValues = Button(
+        tab.loadKerningValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.updateKerningPairsCallback,
+                callback=self.loadKerningPairsCallback,
             )
 
         # x += self.buttonWidth + p
@@ -712,7 +703,7 @@ class VarFontAssistant:
 
     # font info values
 
-    def updateFontInfoCallback(self, sender):
+    def loadFontInfoCallback(self, sender):
 
         if not self.selectedSources:
             return
@@ -742,7 +733,7 @@ class VarFontAssistant:
 
         tab = self._tabs['font values']
 
-        if not self.selectedSources or not len(self._fontInfo):
+        if not self.selectedSources or not self._fontInfo:
             tab.fontInfoValues.set([])
             return
 
@@ -922,7 +913,7 @@ class VarFontAssistant:
             allowsMultipleSelection=True,
             enableDelete=False)
 
-    def updateMeasurementsCallback(self, sender):
+    def loadMeasurementsCallback(self, sender):
 
         if not self.selectedMeasurements:
             return
@@ -979,7 +970,7 @@ class VarFontAssistant:
 
     # glyph values
 
-    def updateGlyphAttributesCallback(self, sender):
+    def loadGlyphAttributesCallback(self, sender):
         '''
         Read glyph names and glyph values from selected sources and update UI.
 
@@ -1012,14 +1003,15 @@ class VarFontAssistant:
         tab.glyphs.set(self._glyphNamesAll)
 
     def updateGlyphValuesCallback(self, sender):
+        '''
+        Update table with sources and glyph values based on the currently selected glyph attribute.
+
+        '''
 
         tab = self._tabs['glyph values']
 
-        if not self.selectedSources:
+        if not self.selectedSources or not self.selectedGlyphAttrs:
             tab.glyphValues.set([])
-            return
-
-        if not self.selectedGlyphAttrs:
             return
 
         glyphName, glyphIndex = self.selectedGlyphName
@@ -1087,11 +1079,11 @@ class VarFontAssistant:
     def saveGlyphValuesCallback(self, sender):
         pass
 
-    # kerning 
+    # kerning
 
-    def updateKerningPairsCallback(self, sender):
+    def loadKerningPairsCallback(self, sender):
         '''
-        Read kerning pairs and values from selected sources and update UI.
+        Load kerning pairs and values from selected sources into the UI.
 
         '''
         if not self.selectedSources:
@@ -1099,7 +1091,7 @@ class VarFontAssistant:
 
         tab = self._tabs['kerning']
         
-        # collect pairs and kerning values in selected fonts
+        # collect pairs and kerning values in selected sources
         allPairs = []
         self._kerning = {}
         for source in self.selectedSources:
@@ -1110,8 +1102,6 @@ class VarFontAssistant:
             self._kerning[sourceFileName] = {}
             for pair, value in f.kerning.items():
                 self._kerning[sourceFileName][pair] = value
-
-        # store all pairs in dict
         self._kerningPairsAll = list(set(allPairs))
         self._kerningPairsAll.sort()
 
@@ -1139,20 +1129,53 @@ class VarFontAssistant:
             print(f'updating kerning values for pair {pair} ({pairIndex})...\n')
 
         # create list items
-        kerningListItems = []
+        values = []
         for fontName in self._kerning.keys():
             value = self._kerning[fontName][pair] if pair in self._kerning[fontName] else 0
+            values.append(value)
+        valuesMax = max(values) - min(values)
+
+        kerningListItems = []
+        for i, fontName in enumerate(self._kerning.keys()):
+            value = values[i]
             listItem = {
                 "file name" : fontName,
                 "value"     : value,
-                "level"     : abs(value),
+                "level"     : value-min(values),
             }
             kerningListItems.append(listItem)
 
         # set kerning values in table
-        tab.kerningValues.set(kerningListItems)
-        
-        # update pairs list label
+        kerningValuesPosSize = tab.kerningValues.getPosSize()
+        del tab.kerningValues
+
+        columnDescriptions = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", minValue=0, maxValue=valuesMax),
+            },
+        ]
+        tab.kerningValues = List(
+                kerningValuesPosSize,
+                kerningListItems,
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
+                editCallback=self.editKerningCallback,
+                enableDelete=False)
+
+        # update kerning pair counter (current/total)
         tab.pairsCounter.set(f'{pairIndex+1} / {len(self._kerningPairsAll)}')
 
     def editKerningCallback(self, sender):

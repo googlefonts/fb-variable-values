@@ -19,9 +19,9 @@ class VarFontAssistant:
     lineHeight        = 22
     verbose           = True
     buttonWidth       = 100
-    _colLeft          = 180
-    _colFontName      = 240
-    _colValue         = 80
+    _colLeft          = 160
+    _colFontName      = 160
+    _colValue         = 60
     _tabsTitles       = ['designspace', 'font values', 'glyph values', 'kerning'] # 'measurements'
     _designspaces     = {}
     _axes             = {}
@@ -219,7 +219,7 @@ class VarFontAssistant:
         y = p/2
         tab.fontInfoLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'font info values')
+                'values')
 
         columnDescriptions = [
             {
@@ -305,7 +305,7 @@ class VarFontAssistant:
         y = p/2
         tab.glyphAttrsLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'glyph attributes')
+                'attributes')
 
         y += self.lineHeight + p/2
         tab.glyphAttrs = List(
@@ -318,7 +318,7 @@ class VarFontAssistant:
         y += self.lineHeight*7 + p
         tab.glyphsLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'glyph values')
+                'values')
 
         columnDescriptions = [
             {
@@ -381,7 +381,7 @@ class VarFontAssistant:
 
         x = p = self.padding
         y = p/2
-        col = 280 # self._colLeft
+        col = self._colLeft * 1.5
         tab.pairsLabel = TextBox(
                 (x, y, -p, self.lineHeight),
                 'pairs')
@@ -405,7 +405,7 @@ class VarFontAssistant:
         x2 = x + col + p
         tab.kerningValuesLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'kerning values')
+                'values')
 
         y += self.lineHeight + p/2
         columnDescriptions = [
@@ -598,32 +598,16 @@ class VarFontAssistant:
 
         tab = self._tabs['designspace']
 
-        # -----------
-        # reset lists
-        # -----------
-
         sourcesPosSize = tab.sources.getPosSize()
         del tab.sources
-
-        # -----------
-        # empty lists
-        # -----------
 
         if not self.selectedDesignspace:
             tab.axes.set([])
             tab.sources = List(sourcesPosSize, [])
             return
 
-        # ------------------------
-        # get selected designspace
-        # ------------------------
-        
         designspace = self.selectedDesignspaceDocument 
 
-        # -----------
-        # update axes
-        # -----------
-        
         # make list items
         self._axes = {}
         axesItems = []
@@ -634,15 +618,9 @@ class VarFontAssistant:
         # create list UI with sources
         tab.axes.set(axesItems)
 
-        # --------------
-        # update sources
-        # --------------
-
-        # get column descriptions
+        # make list items
         sourcesDescriptions  = [{'title': 'file name', 'minWidth': self._colFontName*2}]
         sourcesDescriptions += [{'title': axis.name, 'width': self._colValue} for axis in designspace.axes]
-
-        # make list items
         self._sources = {}
         sourcesItems = []
         for source in designspace.sources:

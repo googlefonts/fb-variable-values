@@ -11,7 +11,7 @@ A tool to view and edit font values in multiple designspace sources at once.
 designspace
 -----------
 
-Use this tab to define which designspace and font sources to look into.
+Define which designspaces and font sources to look into.
 
 <div class='row'>
 
@@ -21,12 +21,12 @@ Use this tab to define which designspace and font sources to look into.
 
 <div class='col-sm' markdown='1'>
 designspaces
-: Drag one or more `.designspace` files from Finder into the list.
+: Drag one or more `.designspace` files into the list.
 
 axes
 : ^
   A list of axes in the selected designspace.  
-  Drag the axes to change the font sorting order.†
+  Reorder the list items to change the font sorting order.†
 
 sources
 : ^
@@ -38,10 +38,10 @@ sources
 </div>
 
 
-fontinfo
---------
+font values
+-----------
 
-Use this tab to visualize and edit font info values in selected sources.
+Visualize and edit font values in selected sources.
 
 <div class='row'>
 
@@ -50,20 +50,22 @@ Use this tab to visualize and edit font info values in selected sources.
 </div>
 
 <div class='col-sm' markdown='1'>
-font info attributes
-: A list of font info attributes to measure.
+attributes
+: A list of font attributes to measure.
 
-font info values
+values
 : Double-click table cells to edit individual values.
 
-update
-: Use the *update* button to scan the fonts, collect values and display them in the UI.
+load
+: Use the *load* button to scan the fonts, collect values and display them in the UI.
 
+<!--
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the table as a CSV file.†
+-->
 
 save
 : Use the *save* button to save the edited values back into the fonts.
@@ -72,10 +74,10 @@ save
 </div>
 
 
-glyphs
-------
+glyph values
+------------
 
-Use this tab to visualize and edit glyph values in selected sources.
+Visualize and edit glyph values in selected sources.
 
 <div class='row'>
 
@@ -84,23 +86,25 @@ Use this tab to visualize and edit glyph values in selected sources.
 </div>
 
 <div class='col-sm' markdown='1'>
-glyph attributes
-: Select one glyph attribute from which to collect values.
+glyphs
+: A list of all glyphs in all selected sources.
 
-glyph names
-: Type or paste a list of glyph names for value collection.
+attributes
+: A list of glyph attributes to measure.
 
-glyph values
+values
 : Double-click table cells to edit individual values.
 
-update
-: Click the *update* button to scan the fonts, collect values and display them in the UI.
+load
+: Click the *load* button to scan the fonts, collect values and display them in the UI.
 
+<!--
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the table as a CSV file.†
+-->
 
 save
 : Use the *save* button to save the edited values back into the fonts.†
@@ -109,10 +113,11 @@ save
 </div>
 
 
+{% comment %}
 measurements
 ------------
 
-Use this tab to measure and visualize specific distances in selected sources.
+Measure and visualize specific distances in selected sources.
 
 <div class='row'>
 
@@ -132,8 +137,8 @@ measurements
 values
 : A list of measured values for the selected sources.†
 
-update
-: Click the *update* button to scan the fonts, collect values and display them in the UI.
+load
+: Click the *load* button to scan the fonts, collect values and display them in the UI.
 
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
@@ -143,32 +148,37 @@ export
 </div>
 
 </div>
+{% endcomment %}
 
 
 kerning
 -------
 
+Visualize and edit kerning values in selected sources.
+
 <div class='row'>
 
 <div class='col-sm' markdown='1'>
-![]({{ site.url }}/images/VarFontAssistant_5.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant_4.png){: .img-fluid}
 </div>
 
 <div class='col-sm' markdown='1'>
 pairs
 : A list of all kerning pairs in all selected sources.
 
-kerning values
+values
 : Values of the selected kerning pair across all selected sources.
 
-update
-: Click the *update* button to scan the fonts, collect values and display them in the UI.
+load
+: Click the *load* button to scan the fonts, collect values and display them in the UI.
 
+<!--
 visualize
 : Use the *visualize* button to plot the numbers with graphics in PDF format.†
 
 export
 : Use the *export* button to save the kerning data as a CSV file.†
+-->
 
 save
 : Use the *save* button to save the edited values back into the fonts.

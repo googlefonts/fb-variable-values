@@ -1,8 +1,7 @@
 import AppKit
 import os, csv
-from operator import itemgetter, attrgetter
-from vanilla import *
-from AppKit import NSFilenamesPboardType, NSDragOperationCopy
+# from operator import itemgetter, attrgetter
+from vanilla import Window, TextBox, List, Button, Tabs, LevelIndicatorListCell
 from mojo.roboFont import OpenWindow
 from fontParts.world import OpenFont
 from fontTools.designspaceLib import DesignSpaceDocument
@@ -85,8 +84,8 @@ class VarFontAssistant:
                 # editCallback=self.selectDesignspaceCallback,
                 selectionCallback=self.selectDesignspaceCallback,
                 otherApplicationDropSettings=dict(
-                    type=NSFilenamesPboardType,
-                    operation=NSDragOperationCopy,
+                    type=AppKit.NSFilenamesPboardType,
+                    operation=AppKit.NSDragOperationCopy,
                     callback=self.dropDesignspaceCallback),
                 )
 
@@ -139,8 +138,8 @@ class VarFontAssistant:
                 enableDelete=True,
                 selectionCallback=self.selectMeasurementFileCallback,
                 otherApplicationDropSettings=dict(
-                    type=NSFilenamesPboardType,
-                    operation=NSDragOperationCopy,
+                    type=AppKit.NSFilenamesPboardType,
+                    operation=AppKit.NSDragOperationCopy,
                     callback=self.dropMeasurementFileCallback),
             )
 
@@ -266,14 +265,14 @@ class VarFontAssistant:
         # tab.exportValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'export',
-        #         # callback=self.exportFontinfoCallback,
+        #         # callback=self.exportFontInfoCallback,
         #     )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'save',
-                callback=self.saveFontinfoCallback,
+                callback=self.saveFontInfoCallback,
             )
 
     def initializeGlyphValuesTab(self):
@@ -351,8 +350,7 @@ class VarFontAssistant:
         tab.loadValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.loadGlyphAttributesCallback,
-            )
+                callback=self.loadGlyphAttributesCallback)
 
         # x += self.buttonWidth + p
         # tab.visualizeValues = Button(
@@ -365,15 +363,14 @@ class VarFontAssistant:
         # tab.exportValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'export',
-        #         # callback=self.exportFontinfoCallback,
+        #         # callback=self.exportFontInfoCallback,
         #     )
 
         x = -(p + self.buttonWidth)
         tab.saveValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'save',
-                # callback=self.saveFontinfoCallback,
-            )
+                callback=self.saveGlyphValuesCallback)
 
     def initializeKerningTab(self):
 
@@ -762,20 +759,27 @@ class VarFontAssistant:
             allowsEmptySelection=False,
             columnDescriptions=columnDescriptions,
             allowsSorting=True,
-            editCallback=self.editFontInfoCallback,
+            editCallback=self.editFontValueCallback,
             enableDelete=False)
 
     def visualizeFontInfoCallback(self, sender):
         print('visualize font infos')
 
-    def editFontInfoCallback(self, sender):
+    def editFontValueCallback(self, sender):
         print('font info edited...')
 
-    def exportFontinfoCallback(self, sender):
+    def exportFontInfoCallback(self, sender):
+        '''
+        Export current font values as a CSV file.
+
+        '''
         pass
 
-    def saveFontinfoCallback(self, sender):
+    def saveFontInfoCallback(self, sender):
+        '''
+        Save the edited font values back into their source fonts.
 
+        '''
         tab = self._tabs['font values']
         fontInfoAttrs = { v: k for k, v in self._fontInfoAttrs.items() }
 
@@ -941,9 +945,13 @@ class VarFontAssistant:
             )
 
     def visualizeMeasurementsCallback(self, sender):
-        print('visualize measurements')
+        pass
 
     def exportMeasurementsCallback(self, sender):
+        '''
+        Export measurement values as a CSV file.
+
+        '''
         pass
 
     # glyph values
@@ -985,7 +993,6 @@ class VarFontAssistant:
         Update table with sources and glyph values based on the currently selected glyph attribute.
 
         '''
-
         tab = self._tabs['glyph values']
 
         if not self.selectedSources or not self.selectedGlyphAttrs:
@@ -1045,17 +1052,78 @@ class VarFontAssistant:
         tab.glyphCounter.set(f'{glyphIndex+1} / {len(self._glyphNamesAll)}')
 
     def editGlyphValueCallback(self, sender):
-        # print('editing glyph value...')
-        pass
+        '''
+        Save the edited glyph value back to the dict, so we can load values for another glyph.
+
+        '''
+        tab = self._tabs['glyph values']
+        selection = tab.glyphValues.getSelection()
+        if not len(selection):
+            return
+
+        i = selection[0]
+        item = tab.glyphValues.get()[i]
+        glyphAttr  = self.selectedGlyphAttrs[0]
+
+        # save change to internal dict
+        glyphName, glyphIndex = self.selectedGlyphName
+        fontName = item['file name']
+        newValue = item['value']
+        oldValue = self._glyphValues[fontName][glyphName][glyphAttr]
+        if oldValue != newValue:
+            if self.verbose:
+                print(f'changed {glyphName}.{glyphAttr} in {fontName}: {oldValue} → {newValue}\n')
+            self._glyphValues[fontName][glyphName][glyphAttr] = int(newValue)
 
     def visualizeGlyphValuesCallback(self, sender):
         pass
 
     def exportGlyphValuesCallback(self, sender):
+        '''
+        Export current glyph values as a CSV file.
+
+        '''
         pass
 
     def saveGlyphValuesCallback(self, sender):
-        pass
+        '''
+        Save the edited glyph values back into their source fonts.
+
+        '''
+        tab = self._tabs['kerning']
+
+        if self.verbose:
+            print('saving edited glyph values to sources...')
+
+        for fontName in self._glyphValues.keys():
+            sourcePath = self._sources[fontName]
+            f = OpenFont(sourcePath, showInterface=False)
+            fontChanged = False
+            for glyphName in self._glyphValues[fontName]:
+                for attr, newValue in self._glyphValues[fontName][glyphName].items():
+                    if newValue is None:
+                        continue
+                    if type(newValue) is str:
+                        if not len(newValue.strip()):
+                            continue
+                    newValue = float(newValue)
+                    if newValue.is_integer():
+                        newValue = int(newValue)
+                    oldValue = getattr(f[glyphName], attr)
+                    if newValue != oldValue:
+                        if self.verbose:
+                            print(f'\twriting new value for {glyphName}.{attr} in {fontName}: {oldValue} → {newValue}')
+                        setattr(f[glyphName], attr, newValue)
+                        if not fontChanged:
+                            fontChanged = True
+            if fontChanged:
+                # if self.verbose:
+                #     print(f'\tsaving {fontName}...')
+                f.save()
+            f.close()
+
+        if self.verbose:
+            print('...done.\n')
 
     # kerning
 
@@ -1180,7 +1248,7 @@ class VarFontAssistant:
             self._kerning[fontName][pair] = int(newValue)
 
         # update level indicator
-        ### this will crash RF
+        ### this will crash RF3!!
         # kerningListItems = []
         # for fontName in self._kerning.keys():
         #     value = self._kerning[fontName][pair] if pair in self._kerning[fontName] else 0
@@ -1193,19 +1261,24 @@ class VarFontAssistant:
         # tab.kerningValues.set(kerningListItems)
 
     def visualizeKerningCallback(self, sender):
-        if self.verbose:
-            print('visualize kerning...\n')
+        pass
 
     def exportKerningCallback(self, sender):
-        if self.verbose:
-            print('export kerning...\n')
+        '''
+        Export current kerning values as a CSV file.
+
+        '''
+        pass
 
     def saveKerningCallback(self, sender):
+        '''
+        Save the edited kerning values back into their source fonts.
 
+        '''
         tab = self._tabs['kerning']
 
         if self.verbose:
-            print('saving kerning data to fonts...\n')
+            print('saving edited kerning values to sources...\n')
 
         for fontName in self._kerning.keys():
             sourcePath = self._sources[fontName]

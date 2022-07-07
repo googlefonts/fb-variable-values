@@ -29,7 +29,7 @@ class VarFontAssistant:
     _sources          = {}
     _measurementFiles = {}
     _measurements     = {}
-    _fontInfoAttrs    = {
+    _fontAttrs    = {
         'unitsPerEm'             : 'unitsPerEm',
         'xHeight'                : 'xHeight',
         'capHeight'              : 'capHeight',
@@ -39,7 +39,7 @@ class VarFontAssistant:
         'openTypeOS2WeightClass' : 'OS2 weight',
         'openTypeOS2WidthClass'  : 'OS2 width',
     }
-    _fontInfo         = {}
+    _fontValues       = {}
     _glyphNamesAll    = []
     _glyphAttrs       = ['width', 'leftMargin', 'rightMargin']
     _glyphValues      = {}
@@ -55,7 +55,7 @@ class VarFontAssistant:
         self.w.tabs = Tabs((x, y, -p, -p), self._tabsTitles)
 
         self.initializeDesignspacesTab()
-        self.initializeFontInfoTab()
+        self.initializeFontValuesTab()
         # self.initializeMeasurementsTab()
         self.initializeGlyphValuesTab()
         self.initializeKerningTab()
@@ -184,17 +184,17 @@ class VarFontAssistant:
         # tab.exportValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'export',
-        #         # callback=self.visualizeFontInfoCallback,
+        #         # callback=self.visualizeFontValuesCallback,
         #     )
 
         # x = -(p + self.buttonWidth)
         # tab.saveValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'save',
-        #         # callback=self.visualizeFontInfoCallback,
+        #         # callback=self.visualizeFontValuesCallback,
         #     )
 
-    def initializeFontInfoTab(self):
+    def initializeFontValuesTab(self):
 
         tab = self._tabs['font values']
 
@@ -203,17 +203,17 @@ class VarFontAssistant:
         col = self._colLeft
         x2 = x + col + p
 
-        tab.fontInfoAttrsLabel = TextBox(
+        tab.fontAttrsLabel = TextBox(
                 (x, y, col, self.lineHeight),
                 'attributes')
 
         y += self.lineHeight + p/2
-        tab.fontInfoAttrs = List(
+        tab.fontAttrs = List(
                 (x, y, col, -(self.lineHeight + p*2)),
-                self._fontInfoAttrs.values(),
+                self._fontAttrs.values(),
                 allowsMultipleSelection=True,
                 allowsEmptySelection=False,
-                selectionCallback=self.updateFontInfoValuesCallback,
+                selectionCallback=self.updateFontValuesCallback,
             )
 
         y = p/2
@@ -238,7 +238,7 @@ class VarFontAssistant:
             },
         ]
         y += self.lineHeight + p/2
-        tab.fontInfoValues = List(
+        tab.fontValues = List(
                 (x2, y, -p, -(self.lineHeight + p*2)),
                 [],
                 allowsMultipleSelection=False,
@@ -252,28 +252,28 @@ class VarFontAssistant:
         tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.loadFontInfoCallback,
+                callback=self.loadFontValuesCallback,
             )
 
         # x += self.buttonWidth + p
         # tab.visualizeValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'visualize',
-        #         callback=self.visualizeFontInfoCallback,
+        #         callback=self.visualizeFontValuesCallback,
         #     )
 
         # x += self.buttonWidth + p
         # tab.exportValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'export',
-        #         # callback=self.exportFontInfoCallback,
+        #         # callback=self.exportFontValuesCallback,
         #     )
 
         x = -(p + self.buttonWidth)
-        tab.saveValues = Button(
+        tab.saveFontValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'save',
-                callback=self.saveFontInfoCallback,
+                callback=self.saveFontValuesCallback,
             )
 
     def initializeGlyphValuesTab(self):
@@ -357,14 +357,14 @@ class VarFontAssistant:
         # tab.visualizeValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'visualize',
-        #         # callback=self.visualizeFontInfoCallback,
+        #         # callback=self.visualizeGlyphValuesCallback,
         #     )
 
         # x += self.buttonWidth + p
         # tab.exportValues = Button(
         #         (x, y, self.buttonWidth, self.lineHeight),
         #         'export',
-        #         # callback=self.exportFontInfoCallback,
+        #         # callback=self.exportGlyphValuesCallback,
         #     )
 
         x = -(p + self.buttonWidth)
@@ -511,14 +511,14 @@ class VarFontAssistant:
     # fontinfo
 
     @property
-    def selectedFontInfoAttr(self):
+    def selectedFontAttr(self):
         tab = self._tabs['font values']
-        selection = tab.fontInfoAttrs.getSelection()
-        fontInfoAttrs = tab.fontInfoAttrs.get()
-        selectedFontInfoAttrs = [fontinfo for i, fontinfo in enumerate(fontInfoAttrs) if i in selection]
-        if not len(selectedFontInfoAttrs):
+        selection = tab.fontAttrs.getSelection()
+        fontAttrs = tab.fontAttrs.get()
+        selectedFontAttrs = [fontinfo for i, fontinfo in enumerate(fontAttrs) if i in selection]
+        if not len(selectedFontAttrs):
             return
-        return selectedFontInfoAttrs[0]
+        return selectedFontAttrs[0]
 
     # measurements
 
@@ -676,7 +676,7 @@ class VarFontAssistant:
 
     # font info values
 
-    def loadFontInfoCallback(self, sender):
+    def loadFontValuesCallback(self, sender):
 
         if not self.selectedSources:
             return
@@ -689,28 +689,28 @@ class VarFontAssistant:
             return
 
         # collect fontinfo values into dict
-        self._fontInfo = {}
+        self._fontValues = {}
         for source in self.selectedSources:
             sourceFileName = source['file name']
             sourcePath = self._sources[sourceFileName]
             f = OpenFont(sourcePath, showInterface=False)
             info = f.info.asDict()
-            self._fontInfo[sourceFileName] = {}
-            for attr, attrLabel in self._fontInfoAttrs.items():
-                self._fontInfo[sourceFileName][attrLabel] = info.get(attr)
+            self._fontValues[sourceFileName] = {}
+            for attr, attrLabel in self._fontAttrs.items():
+                self._fontValues[sourceFileName][attrLabel] = info.get(attr)
             f.close()
 
-        self.updateFontInfoValuesCallback(None)
+        self.updateFontValuesCallback(None)
 
-    def updateFontInfoValuesCallback(self, sender):
+    def updateFontValuesCallback(self, sender):
 
         tab = self._tabs['font values']
 
-        if not self.selectedSources or not self._fontInfo:
-            tab.fontInfoValues.set([])
+        if not self.selectedSources or not self._fontValues:
+            tab.fontValues.set([])
             return
 
-        fontInfoAttr = self.selectedFontInfoAttr
+        fontAttr = self.selectedFontAttr
 
         if self.verbose:
             print('updating font info values...\n')
@@ -718,8 +718,8 @@ class VarFontAssistant:
         # create list items
         values = []
         fontInfoItems = []
-        for fontName in self._fontInfo.keys():
-            value = self._fontInfo[fontName][fontInfoAttr]
+        for fontName in self._fontValues.keys():
+            value = self._fontValues[fontName][fontAttr]
             if value is None:
                 value = '—'
             listItem = {
@@ -731,8 +731,8 @@ class VarFontAssistant:
             values.append(value)
 
         # set glyph values in table
-        fontInfoValuesPosSize = tab.fontInfoValues.getPosSize()
-        del tab.fontInfoValues
+        fontInfoValuesPosSize = tab.fontValues.getPosSize()
+        del tab.fontValues
 
         columnDescriptions = [
             {
@@ -750,7 +750,7 @@ class VarFontAssistant:
                 'cell'     : LevelIndicatorListCell(style="continuous", minValue=min(values), maxValue=max(values)),
             },
         ]
-        tab.fontInfoValues = List(
+        tab.fontValues = List(
             fontInfoValuesPosSize,
             fontInfoItems,
             allowsMultipleSelection=False,
@@ -760,58 +760,81 @@ class VarFontAssistant:
             editCallback=self.editFontValueCallback,
             enableDelete=False)
 
-    def visualizeFontInfoCallback(self, sender):
+    def visualizeFontValuesCallback(self, sender):
         print('visualize font infos')
 
     def editFontValueCallback(self, sender):
-        print('font info edited...')
+        '''
+        Save the edited font value back to the dict, so we can load values for another attribute.
 
-    def exportFontInfoCallback(self, sender):
+        '''
+        tab = self._tabs['font values']
+        selection = tab.fontValues.getSelection()
+        if not len(selection):
+            return
+
+        i = selection[0]
+        item = tab.fontValues.get()[i]
+
+        # save change to internal dict
+        fontAttr = self.selectedFontAttr
+        fontName = item['file name']
+        newValue = item['value']
+        oldValue = self._fontValues[fontName].get(fontAttr)
+        if oldValue != newValue:
+            if self.verbose:
+                print(f'changed font value {fontAttr} in {fontName}: {oldValue} → {newValue}\n')
+            self._fontValues[fontName][fontAttr] = int(newValue)
+
+    def exportFontValuesCallback(self, sender):
         '''
         Export current font values as a CSV file.
 
         '''
         pass
 
-    def saveFontInfoCallback(self, sender):
+    def saveFontValuesCallback(self, sender):
         '''
         Save the edited font values back into their source fonts.
 
         '''
         tab = self._tabs['font values']
-        fontInfoAttrs = { v: k for k, v in self._fontInfoAttrs.items() }
+        fontAttrs = { v: k for k, v in self._fontAttrs.items() }
 
         if self.verbose:
-            print('saving font info data to fonts...\n')
+            print('saving edited font values to sources...')
 
-        for item in tab.fontInfoValues.get():
-            sourceFileName = item['file name']
-            sourcePath = self._sources[sourceFileName]
-
+        for fontName in self._fontValues.keys():
+            sourcePath = self._sources[fontName]
             f = OpenFont(sourcePath, showInterface=False)
-            fileChanged = False
+            fontChanged = False
 
-            for key, value in item.items():
-                if key == 'file name':
+            # for attr in self._fontValues[fontName]:
+            for attr, newValue in self._fontValues[fontName].items():
+                fontAttr = fontAttrs[attr]
+                if newValue is None:
                     continue
-                attr = fontInfoAttrs[key]
-                if type(value) not in [int, float]:
-                    try:
-                        value = float(value) if attr == 'italicAngle' else int(value)
-                    except:
+                if type(newValue) is str:
+                    if not len(newValue.strip()):
                         continue
-                if value == getattr(f.info, attr):
-                    continue
-                print(f'\t{sourceFileName}: writing {attr}: {getattr(f.info, attr)} (old) → {value} (new)')
-                setattr(f.info, attr, value)
-                if not fileChanged:
-                    fileChanged = True
-
-            if fileChanged:
+                newValue = float(newValue)
+                if newValue.is_integer():
+                    newValue = int(newValue)
+                oldValue = getattr(f.info, fontAttr)
+                if newValue != oldValue:
+                    if self.verbose:
+                        print(f'\twriting new value for {attr} in {fontName}: {oldValue} → {newValue}')
+                    setattr(f.info, fontAttr, newValue)
+                    if not fontChanged:
+                        fontChanged = True
+            if fontChanged:
+                # if self.verbose:
+                #     print(f'\tsaving {fontName}...')
                 f.save()
             f.close()
 
-        print('\n...done.\n')
+        if self.verbose:
+            print('...done.\n')
 
     # measurements
 
@@ -1051,7 +1074,7 @@ class VarFontAssistant:
 
     def editGlyphValueCallback(self, sender):
         '''
-        Save the edited glyph value back to the dict, so we can load values for another glyph.
+        Save the edited glyph value back to the dict, so we can load values for another glyph or attribute.
 
         '''
         tab = self._tabs['glyph values']

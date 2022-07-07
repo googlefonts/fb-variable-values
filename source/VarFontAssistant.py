@@ -1,6 +1,6 @@
 import AppKit
 import os, csv
-# from operator import itemgetter, attrgetter
+from operator import itemgetter, attrgetter
 from vanilla import Window, TextBox, List, Button, Tabs, LevelIndicatorListCell
 from mojo.roboFont import OpenWindow
 from fontParts.world import OpenFont
@@ -24,6 +24,7 @@ class VarFontAssistant:
     _tabsTitles       = ['designspace', 'font values', 'glyph values', 'kerning'] # 'measurements'
     _designspaces     = {}
     _axes             = {}
+    _axesOrder        = []
     _axesTitles       = ['name', 'tag', 'minimum', 'maximum', 'default']
     _sources          = {}
     _measurementFiles = {}
@@ -636,25 +637,22 @@ class VarFontAssistant:
             enableDelete=False)
 
     def editAxesCallback(self, sender):
-        # tab = self._tabs['designspace']
-        # axesOrder = [ a['name'] for a in tab.axes.get() ]
+        tab = self._tabs['designspace']
+        self.axesOrder = [ a['name'] for a in tab.axes.get() ]
         
-        # if not hasattr(tab, 'sources'):
-        #     return
+        if not hasattr(tab, 'sources'):
+            return
 
-        # _sourceItems = tab.sources.get()
-        # sourceItems = []
-        # for item in _sourceItems:
-        #     D = {}
-        #     for k, v in item.items():
-        #         D[k] = v
-        #     sourceItems.append(D)
+        _sourceItems = tab.sources.get()
+        sourceItems = []
+        for item in _sourceItems:
+            D = {}
+            for k, v in item.items():
+                D[k] = v
+            sourceItems.append(D)
 
-        # print(sourceItems)
-        # sourceItems = sorted(sourceItems, key=attrgetter(*axesOrder))
-        # print(sourceItems)
-        # tab.sources.set(sourceItems)
-        pass
+        sourceItems = sorted(sourceItems, key=itemgetter(*self.axesOrder))
+        tab.sources.set(sourceItems)
 
     def genericDragCallback(self, sender, indexes):
         return indexes
@@ -1278,7 +1276,7 @@ class VarFontAssistant:
         tab = self._tabs['kerning']
 
         if self.verbose:
-            print('saving edited kerning values to sources...\n')
+            print('saving edited kerning values to sources...')
 
         for fontName in self._kerning.keys():
             sourcePath = self._sources[fontName]
@@ -1303,7 +1301,7 @@ class VarFontAssistant:
             f.close()
 
         if self.verbose:
-            print('\n...done.\n')
+            print('...done.\n')
 
 
 # ----

@@ -26,7 +26,7 @@ designspaces
 axes
 : ^
   A list of axes in the selected designspace.  
-  {% comment %}Reorder the list items to change the font sorting order.{% endcomment %}
+  Drag the items to change the font sorting order.
 
 sources
 : ^

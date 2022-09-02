@@ -1,5 +1,5 @@
 ---
-title  : VarFont Assistant
+title  : Variable Values tool
 layout : default
 order  : 1
 ---

@@ -1,11 +1,11 @@
 ---
-title  : VarTools user docs
+title  : Variable Values docs
 layout : default
 ---
 
 <span class='badge bg-secondary'>version {{ site.version }}</span>
 
-A new set of tools to assist in the development of variable fonts.
+A RoboFont extension to visualize and edit values across designspace sources.
 {: .lead }
 
 <div class='row'>
@@ -23,11 +23,7 @@ Topics
 Reference
 ---------
 
-- [VarFont Assistant](varfont-assistant)
-{% comment %}
-- [VarGlyph Assistant](varglyph-assistant)
-- [Glyph Validator](glyph-validator)
-{% endcomment %}
+- [Variable Values tool](variable-values-tool)
 </div>
 
 <div class='col' markdown='1'>

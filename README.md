@@ -1,6 +1,6 @@
-VarTools
-========
+Variable Values
+===============
 
-A new set of tools to assist in the development of variable fonts.
+A RoboFont extension to visualize and edit values in a designspace.
 
-*work in progress…* check the [docs](https://gferreira.github.io/vartools/) for more info
+see the [documentation](https://gferreira.github.io/VariableValues/) for more info

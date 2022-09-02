@@ -1,8 +1,8 @@
-title: VarTools user documentation
+title: Variable Values user documentation
 email: gustavo@hipertipo.com
-description: VarTools user documentation
+description: A RoboFont extension to visualize and edit values in a designspace.
 baseurl: ""
-url: https://gferreira.github.io/vartools/
+url: https://gferreira.github.io/VariableValues/
 
 markdown: kramdown
 

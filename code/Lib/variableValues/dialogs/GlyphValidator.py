@@ -27,7 +27,8 @@ class GlyphValidator:
     _tabsTitles  = ['definitions', 'validation']
     _memesTitles = ['glyph name', 'width', 'left', 'right', 'body', 'counter'] 
 
-    _memesFolder = '/hipertipo/tools/VarTools/_data/glyphMemes/'
+    _memesFolder = '/Users/sergiogonzalez/Desktop/hipertipo/tools/VariableValues/data/recipes' # '/hipertipo/tools/VarTools/_data/glyphMemes/'
+    assert os.path.exists(_memesFolder)
 
     _fonts = {}
 

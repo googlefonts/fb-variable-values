@@ -72,7 +72,7 @@ class VarGlyphAssistant:
     ]
 
     def __init__(self):
-        self.w = FloatingWindow(
+        self.w = Window(
                 (self.width, self.height), title=self.title,
                 minSize=(self.width*0.9, 360))
 
@@ -84,6 +84,7 @@ class VarGlyphAssistant:
         self.initializeCompatibilityTab()
         self.initializeValidationTab()
 
+        self.w.getNSWindow().setTitlebarAppearsTransparent_(True)
         self.w.open()
 
     # initialize UI

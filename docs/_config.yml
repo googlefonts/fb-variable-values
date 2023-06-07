@@ -14,7 +14,7 @@ collections:
     output: true
     permalink: /:path/
 
-version: 0.1
+version: 0.1.0
 
 exclude:
   - .sass-cache/

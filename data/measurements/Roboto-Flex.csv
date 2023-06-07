@@ -1,0 +1,32 @@
+XOPQ;general x opaque;x;H;48;0;48;11
+XOUC;x stem uppercase;x;H;48;0;48;11
+XOLC;x stem lowercase;x;n;6E;0;6E;20
+XOFI;x stem figures;x;1;31;0;31;6
+XTRA;general x transparent;x;H;48;11;48;8
+XTUC;x trans uppercase;x;H;48;11;48;8
+XTLC;x trans lowercase;x;n;6E;20;6E;12
+XTFI;x trans figures;x;0;30;14;30;20
+XTAB;figure width;x;0;30;0;30;8
+GRAD;grade;x;H;48;0;48;11
+XTSB;general x sidebearing;x;H;48;7;48;12
+XUCS;x sidebearing uppercase H;x;H;48;7;48;12
+XUCR;x sidebearing uppercase O;x;O;4F;7;4F;28
+XLCS;x sidebearing lowercase n;x;n;6E;11;6E;21
+XLCR;x sidebearing lowercase o;x;o;6F;7;6F;28
+XFIR;x sidebearing figure 0;x;0;30;7;30;28
+YOPQ;general y opaque;y;H;48;0;48;1
+YOUC;y opaque uppercase;y;H;48;0;48;1
+YOLC;y opaque lowercase;y;f;66;0;66;4
+YOFI;y opaque figures;y;0;30;11;30;4
+YTAS;y transparent ascender;y;h;68;1
+YTDE;y transparent descender;y;p;70;0
+YTOS;general y overshoot;y;O-H;48;1;4F;4
+YTUO;y uppercase overshoot;y;O-H;48;1;4F;4
+YTLO;y lowercase overshoot;y;o-x;78;8;6F;4
+YTFO;y figures overshoot;y;0-5;35;17;30;4
+YTDO;y descender overshoot;y;g-p;67;28;70;0
+YTAO;y ascender overshoot;y;f-h;68;1;66;4
+YTRA;y transparent;y;H+p;70;0;48;1
+YTUC;y transparent uppercase;y;H;48;1
+YTLC;y transparent lowercase;y;x;78;8
+YTFI;y transparent figures;y;5;35;17

@@ -1,3 +1,7 @@
+from importlib import reload
+import variableValues.measurements
+reload(variableValues.measurements)
+
 import AppKit
 import os, csv
 from operator import itemgetter, attrgetter
@@ -6,7 +10,7 @@ from mojo.roboFont import OpenWindow
 from fontParts.world import OpenFont
 from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.agl import UV2AGL
-
+from variableValues.measurements import * # importMeasurementDescriptionsFromCSV, FontMeasurements, Measurement
 
 class VarFontAssistant:
     
@@ -21,7 +25,7 @@ class VarFontAssistant:
     _colLeft          = 160
     _colFontName      = 160
     _colValue         = 60
-    _tabsTitles       = ['designspace', 'font values', 'glyph values', 'kerning'] # 'measurements'
+    _tabsTitles       = ['designspace', 'font values', 'measurements', 'glyph values', 'kerning']
     _designspaces     = {}
     _axes             = {}
     _axesOrder        = []
@@ -30,14 +34,25 @@ class VarFontAssistant:
     _measurementFiles = {}
     _measurements     = {}
     _fontAttrs    = {
-        'unitsPerEm'             : 'unitsPerEm',
-        'xHeight'                : 'xHeight',
-        'capHeight'              : 'capHeight',
-        'descender'              : 'descender',
-        'ascender'               : 'ascender',
-        'italicAngle'            : 'italic angle',
-        'openTypeOS2WeightClass' : 'OS2 weight',
-        'openTypeOS2WidthClass'  : 'OS2 width',
+        'unitsPerEm'                   : 'unitsPerEm',
+        'xHeight'                      : 'xHeight',
+        'capHeight'                    : 'capHeight',
+        'descender'                    : 'descender',
+        'ascender'                     : 'ascender',
+        'italicAngle'                  : 'italic angle',
+        'openTypeOS2WeightClass'       : 'OS2 weight',
+        'openTypeOS2WidthClass'        : 'OS2 width',
+        'openTypeOS2WeightClass'       : 'OS2 weight',
+        'openTypeOS2TypoAscender'      : 'OS2 typo ascender',
+        'openTypeOS2TypoDescender'     : 'OS2 typo descender',
+        'openTypeOS2TypoLineGap'       : 'OS2 line gap',
+        'openTypeOS2WinAscent'         : 'OS2 win ascender',
+        'openTypeOS2WinDescent'        : 'OS2 win descender',
+        'openTypeOS2StrikeoutSize'     : 'OS2 strikeout size',
+        'openTypeOS2StrikeoutPosition' : 'OS2 strikeout position',
+        'openTypeHheaAscender'         : 'hhea ascender',
+        'openTypeHheaDescender'        : 'hhea descender',
+        'openTypeHheaLineGap'          : 'hhea line gap',
     }
     _fontValues       = {}
     _glyphNamesAll    = []
@@ -56,7 +71,7 @@ class VarFontAssistant:
 
         self.initializeDesignspacesTab()
         self.initializeFontValuesTab()
-        # self.initializeMeasurementsTab()
+        self.initializeMeasurementsTab()
         self.initializeGlyphValuesTab()
         self.initializeKerningTab()
 
@@ -126,73 +141,86 @@ class VarFontAssistant:
 
         x = p = self.padding
         y = p/2
+        col = self._colLeft
+        x2 = x + col + p
+
         tab.measurementFilesLabel = TextBox(
                 (x, y, -p, self.lineHeight),
                 'measurement files')
 
         y += self.lineHeight + p/2
         tab.measurementFiles = List(
-                (x, y, -p, self.lineHeight*3),
+                (x, y, -p, self.lineHeight*5),
                 [],
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
                 enableDelete=True,
+                # editCallback=self.selectDesignspaceCallback,
                 selectionCallback=self.selectMeasurementFileCallback,
                 otherApplicationDropSettings=dict(
                     type=AppKit.NSFilenamesPboardType,
                     operation=AppKit.NSDragOperationCopy,
                     callback=self.dropMeasurementFileCallback),
-            )
+                )
 
-        y += self.lineHeight*3 + p
+        y += self.lineHeight*5 + p
+
+        # tab.button = Button((x, y, -p, self.lineHeight),
+        #         "get measurements…",
+        #         # callback=self.buttonCallback,
+        #         )
+
         tab.measurementsLabel = TextBox(
-                (x, y, -p, self.lineHeight),
+                (x, y, col, self.lineHeight),
                 'measurements')
 
         y += self.lineHeight + p/2
         tab.measurements = List(
-                (x, y, -p, self.lineHeight*7),
+                (x, y, col, -(self.lineHeight + p*2)),
                 [],
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                selectionCallback=self.updateMeasurementsCallback,
             )
 
-        y += self.lineHeight*7 + p
-        tab.valuesLabel = TextBox(
-                (x, y, -p, self.lineHeight),
+        y = self.lineHeight*6 + p*2
+        tab.fontMeasurementsLabel = TextBox(
+                (x2, y, -p, self.lineHeight),
                 'values')
 
+        columnDescriptions = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", maxValue=1600),
+            },
+        ]
         y += self.lineHeight + p/2
-        tab.values = List(
-                (x, y, -p, -(self.lineHeight + p*2)),
+        tab.fontMeasurements = List(
+                (x2, y, -p, -(self.lineHeight + p*2)),
                 [],
-            )
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
+                # editCallback=self.editFontInfoValueCallback,
+                enableDelete=False)
 
         y = -(self.lineHeight + p)
-        tab.loadValues = Button(
+        tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.loadMeasurementsCallback,
+                callback=self.loadFontValuesCallback,
             )
-
-        # x += self.buttonWidth + p
-        # tab.visualizeValues = Button(
-        #         (x, y, self.buttonWidth, self.lineHeight),
-        #         'visualize',
-        #         callback=self.visualizeMeasurementsCallback,
-        #     )
-
-        # x += self.buttonWidth + p
-        # tab.exportValues = Button(
-        #         (x, y, self.buttonWidth, self.lineHeight),
-        #         'export',
-        #         # callback=self.visualizeFontValuesCallback,
-        #     )
-
-        # x = -(p + self.buttonWidth)
-        # tab.saveValues = Button(
-        #         (x, y, self.buttonWidth, self.lineHeight),
-        #         'save',
-        #         # callback=self.visualizeFontValuesCallback,
-        #     )
 
     def initializeFontValuesTab(self):
 
@@ -211,7 +239,7 @@ class VarFontAssistant:
         tab.fontAttrs = List(
                 (x, y, col, -(self.lineHeight + p*2)),
                 self._fontAttrs.values(),
-                allowsMultipleSelection=True,
+                allowsMultipleSelection=False,
                 allowsEmptySelection=False,
                 selectionCallback=self.updateFontValuesCallback,
             )
@@ -527,14 +555,17 @@ class VarFontAssistant:
         tab = self._tabs['measurements']
         selection = tab.measurementFiles.getSelection()
         measurementFiles = tab.measurementFiles.get()
-        return [measurementFile for i, measurementFiles in enumerate(measurementFiles)] if len(measurementFiles) else None
+        selectedMeasurementFiles = [measurementFile for i, measurementFile in enumerate(measurementFiles) if i in selection]
+        if not len(selectedMeasurementFiles):
+            return
+        return selectedMeasurementFiles[0]
 
     @property
     def selectedMeasurements(self):
         tab = self._tabs['measurements']
         selection = tab.measurements.getSelection()
         measurements = tab.measurements.get()
-        selectedMeasurements = [measurement for i, measurement in enumerate(measurements) if i in selection]
+        selectedMeasurements = [m for i, m in enumerate(measurements) if i in selection]
         if not len(selectedMeasurements):
             return
         return selectedMeasurements
@@ -617,7 +648,7 @@ class VarFontAssistant:
         tab.axes.set(axesItems)
 
         # make list items
-        sourcesDescriptions  = [{'title': 'file name', 'minWidth': self._colFontName*2}]
+        sourcesDescriptions  = [{'title': 'file name', 'width': self._colFontName*1.5, 'minWidth': self._colFontName, 'maxWidth': self._colFontName*3}]
         sourcesDescriptions += [{'title': axis.name, 'width': self._colValue} for axis in designspace.axes]
         self._sources = {}
         sourcesItems = []
@@ -739,6 +770,7 @@ class VarFontAssistant:
                 "title"    : 'file name',
                 'width'    : self._colFontName*1.5,
                 'minWidth' : self._colFontName,
+                'maxWidth' : self._colFontName*3,
             },
             {
                 "title"    : 'value',
@@ -862,108 +894,93 @@ class VarFontAssistant:
     def selectMeasurementFileCallback(self, sender):
 
         tab = self._tabs['measurements']
-        selection = sender.getSelection()
-        measurementFiles = tab.measurementFiles.get()
 
-        # delete current list
-        posSize = tab.measurements.getPosSize()
-        del tab.measurements
-
-        # list of measurements is empty
-        if not selection or not len(measurementFiles):
-            tab.measurements = List(posSize, [])
+        if not self.selectedMeasurementFile:
+            tab.measurements.set([])
             return
 
-        # get measurements from selected measurement file
-        measurementFileLabel = [F for i, F in enumerate(measurementFiles) if i in selection][0]
-        measurementFilePath = self._measurementFiles[measurementFileLabel]
+        measurementFilePath = self._measurementFiles[self.selectedMeasurementFile]
+        measurementTuples = importMeasurementDescriptionsFromCSV(measurementFilePath)
+        measurementNames = [m[0] for m in measurementTuples]
+        tab.measurements.set(measurementNames)
 
-        with open(measurementFilePath, mode ='r') as file:
-            csvFile = csv.DictReader(file)
-            self._measurementFiles = {}
-            items = []
-            for i, lines in enumerate(csvFile):
-                # # get column descriptions
-                if i == 0:
-                    titles = lines.keys()
-                    descriptions = [{"title": T} for T in titles]
-
-                # skip empty measurements
-                if not any( list(lines.values())[2:] ):
-                    continue
-
-                # replace unicode hex values with unicode character
-                if lines['Glyph 1']:
-                    uniHex = lines['Glyph 1']
-                    uniInt = int(uniHex.lstrip("x"), 16)
-                    glyphName = UV2AGL.get(uniInt)
-                    lines['Glyph 1'] = glyphName
-
-                if lines['Glyph 2']:
-                    uniHex = lines['Glyph 2']
-                    uniInt = int(uniHex.lstrip("x"), 16)
-                    glyphName = UV2AGL.get(uniInt)
-                    lines['Glyph 2'] = glyphName
-
-
-                # create list item
-                items.append(lines)
-
-        # create list UI with items
-        tab.measurements = List(
-            posSize, items,
-            columnDescriptions=descriptions,
-            allowsMultipleSelection=True,
-            enableDelete=False)
-
-    def loadMeasurementsCallback(self, sender):
+    def updateMeasurementsCallback(self, sender):
 
         if not self.selectedMeasurements:
             return
 
         tab = self._tabs['measurements']
 
-        # reset list
-        valuesPosSize = tab.values.getPosSize()
-        del tab.values
-
         # empty list
-        if not self.selectedMeasurements:
-            tab.values = List(valuesPosSize, [])
+        if not self.selectedMeasurements or not self.selectedSources:
+            tab.fontMeasurements.set([])
             return
 
         # collect measurements into dict
         self._measurements = {}
+
+        measurementFilePath = self._measurementFiles[self.selectedMeasurementFile]
+        measurementTuples = importMeasurementDescriptionsFromCSV(measurementFilePath)
+
         for source in self.selectedSources:
             sourceFileName = source['file name']
             sourcePath = self._sources[sourceFileName]
 
             f = OpenFont(sourcePath, showInterface=False)
-
             self._measurements[sourceFileName] = {}
-            for measurement in self.selectedMeasurements:
-                measurementKey = measurement['Axis']
-                self._measurements[sourceFileName][measurementKey] = 'XXX'
+
+            for measurementTuple in measurementTuples:
+                if measurementTuple[0] not in self.selectedMeasurements:
+                    continue
+
+                M = Measurement(f, measurementTuple)
+                measurementKey = measurementTuple[0]
+                self._measurements[sourceFileName] = M.value
 
             f.close()
 
-        # make list items
+        # create list items
+        values = []
         valuesItems = []
-        for sourceFileName in self._measurements.keys():
-            valuesItem = { 'file name' : sourceFileName }
-            for measurement in self._measurements[sourceFileName].keys():
-                valuesItem[measurement] = self._measurements[sourceFileName][measurement]
-            valuesItems.append(valuesItem)
+        for fontName, value in self._measurements.items():
+            listItem = {
+                "file name" : fontName,
+                "value"     : value,
+                "level"     : abs(value),
+            }
+            valuesItems.append(listItem)
+            values.append(value)
 
-        # create list UI with values
-        valueDescriptions  = [{"title": 'file name', 'minWidth': self._colFontName}]
-        valueDescriptions += [{"title": D['Axis'], 'width': self._colValue} for D in self.selectedMeasurements]
-        tab.values = List(
-            valuesPosSize, valuesItems,
-            columnDescriptions=valueDescriptions,
-            # allowsMultipleSelection=True,
-            # enableDelete=False
-            )
+        # set measurement values in table
+        valuesPosSize = tab.fontMeasurements.getPosSize()
+        del tab.fontMeasurements
+
+        columnDescriptions  = [
+            {
+                "title"    : 'file name',
+                'width'    : self._colFontName*1.5,
+                'minWidth' : self._colFontName,
+                'maxWidth' : self._colFontName*3,
+            },
+            {
+                "title"    : 'value',
+                'width'    : self._colValue,
+            },
+            {
+                "title"    : 'level',
+                'width'    : self._colValue*1.5,
+                'cell'     : LevelIndicatorListCell(style="continuous", minValue=min(values), maxValue=max(values)),
+            },
+        ]
+        tab.fontMeasurements = List(
+                valuesPosSize,
+                valuesItems,
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                columnDescriptions=columnDescriptions,
+                allowsSorting=True,
+                # editCallback=self.editGlyphValueCallback,
+                enableDelete=False)
 
     def visualizeMeasurementsCallback(self, sender):
         pass
@@ -1048,6 +1065,7 @@ class VarFontAssistant:
                 "title"    : 'file name',
                 'width'    : self._colFontName*1.5,
                 'minWidth' : self._colFontName,
+                'maxWidth' : self._colFontName*3,
             },
             {
                 "title"    : 'value',

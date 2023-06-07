@@ -16,7 +16,7 @@ resourcesFolder  = None # os.path.join(baseFolder, 'Resources')
 imagePath        = None # os.path.join(resourcesFolder, 'punch.png')
 
 outputFolder     = baseFolder 
-extensionPath    = os.path.join(outputFolder, 'VariableSpacing.roboFontExt')
+extensionPath    = os.path.join(outputFolder, 'VariableValues.roboFontExt')
 docsFolder       = None # os.path.join(outputFolder, 'docs', '_site')
 
 # ---------------
@@ -28,7 +28,7 @@ def buildExtension():
     pycOnly = False # [ "3.6", "3.7" ]
 
     B = ExtensionBundle()
-    B.name                 = "Variable Spacing"
+    B.name                 = "VariableValues"
     B.developer            = 'Gustavo Ferreira'
     B.developerURL         = 'http://hipertipo.com/'
     B.icon                 = imagePath
@@ -73,6 +73,6 @@ def buildExtension():
 
 pycClear(baseFolder)
 pyCacheClear(baseFolder)
-print(f'building Variable Spacing extension {version}...\n')
+print(f'building VariableValues extension {version}...\n')
 buildExtension()
 print('\n...done!\n')

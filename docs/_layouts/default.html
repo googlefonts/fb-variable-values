@@ -34,36 +34,24 @@
     })
     </script>
   {% endif %}
-  {% comment %}
-  {% include tracker.html %}
-  {% endcomment %}
 </head>
 
-{% if page.collection %}
-  {% capture all_pages %}{{ page.collection }}{% endcapture %}
-  {% assign pages = site[all_pages] | sort: "order" %}
-  {% for nav_page in pages %}
-    {% if nav_page.title == page.title %}
-      {% unless forloop.first %}
-        {% assign prev_url = prev.url %}
-        {% assign prev_title = prev.title %}
-      {% endunless %}
-      {% unless forloop.last %}
-        {% assign next = pages[forloop.index] %}
-        {% assign next_url = next.url %}
-        {% assign next_title = next.title %}
-      {% endunless %}
-    {% endif %}
-    {% assign prev = nav_page %}
-  {% endfor %}
-{% endif %}
-
 <body {% if page.class %}class='{{page.class}}'{% endif %}>
-  {% include nav_main.html %}
-  <main class='home mt-5'>
-    <div class="container mx-auto px-md-4 py-4 bg-white">
+
+  <nav id='navbar-main' class="navbar">
+    <div class="container mx-auto px-md-4">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ site.url }}">index</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container mx-auto px-md-4 bg-white">
       <div class='row'>
-        <h1 class='col-sm-9 mt-sm-1'>{{ page.title }}</h1>
+        <h1 class='col-12 mt-sm-1'>{{ page.title }}</h1>
         {% comment %}
         {% if page.collection %}
           {% if prev_url or next_url %}
@@ -88,7 +76,7 @@
       {{ content }}
     </div>
   </main>
-  <footer class="container mx-auto px-auto px-md-4 my-4">
+  <footer class="container mx-auto px-auto px-md-4 mt-5 mb-4">
     <p class='small text-muted'>
      This documentation is licensed under a <a href='https://creativecommons.org/licenses/by/4.0/'>Creative Commons Attribution 4.0 International license</a>.
     </p>

@@ -5,10 +5,10 @@ excludeNavigation: true
 ---
 
 @import "highlights"
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex&display=swap')
 
 body
-  background-color: rgba(0, 0, 0, .125)
-  position: relative
+  font-family: 'Roboto Flex', sans-serif !important
 
 img
   user-select: none
@@ -18,9 +18,8 @@ main, footer
     text-decoration: none
     &:hover
       border-bottom: solid 1px
-
   a[href*="//"]:not([href*="localhost:4000"]),
-  a[href*="//"]:not([href*="hipertipo.gitlab.io/hrasterizer-extension"])
+  a[href*="//"]:not([href*="gferreira.github.io/VariableSpacing"])
     &:not(.page-link)
       &:hover
         border-bottom-width: 3px !important
@@ -29,30 +28,8 @@ main, footer
 ul
   padding-left: 1.5em
 
-::selection
-  background-color: #EFEFEF
-
-#logo
-  padding: 0 14px 7px 0
-  svg
-    border: none !important
-    transform-origin: 0px 5px
-    transform: scale(3)
-
-  #foreground
-    fill: white
-  #background
-    fill: #777
-
-  &:hover
-    #background
-      fill: #333
-
 .container
   max-width: 960px
-
-.navbar, footer
-  background-color: #DFDFDF !important
 
 .changelog
   .badge
@@ -73,13 +50,18 @@ ul
       display: inline-block
 
 .highlight
-  background-color: rgba(0, 0, 0, .03)
+  overflow: hidden !important
+  background-color: #EEE // rgba(0, 0, 0, .03)
+  margin: 1em auto
+  > .highlight
+    margin: 0 auto
+    padding: 1em
 
 // collapsible kramdown toc
 #markdown-toc
   margin: 1em 0
   padding: 1em
-  background-color: #EFEFEF
+  background-color: #EEE
   border-radius: 0
   list-style-position: inside
   ul

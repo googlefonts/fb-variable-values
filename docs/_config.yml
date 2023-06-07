@@ -1,20 +1,12 @@
-title: Variable Values user documentation
+title: VariableValues docs
 email: gustavo@hipertipo.com
-description: A RoboFont extension to visualize and edit values in a designspace.
+description: VariableValues documentation
 baseurl: ""
 url: https://gferreira.github.io/VariableValues/
 
 markdown: kramdown
 
-collections:
-  topics:
-    output: true
-    permalink: /:path/
-  reference:
-    output: true
-    permalink: /:path/
-
-version: 0.1.0
+version: 0.1.1
 
 exclude:
   - .sass-cache/

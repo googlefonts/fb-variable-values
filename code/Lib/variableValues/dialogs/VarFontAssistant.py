@@ -3,14 +3,14 @@ import variableValues.measurements
 reload(variableValues.measurements)
 
 import AppKit
-import os, csv
+import os
 from operator import itemgetter, attrgetter
 from vanilla import Window, TextBox, List, Button, Tabs, LevelIndicatorListCell
-from mojo.roboFont import OpenWindow
 from fontParts.world import OpenFont
 from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.agl import UV2AGL
-from variableValues.measurements import * # importMeasurementDescriptionsFromCSV, FontMeasurements, Measurement
+from mojo.roboFont import OpenWindow
+from variableValues.measurements import importMeasurementDescriptionsFromCSV, FontMeasurements
 
 class VarFontAssistant:
     
@@ -92,7 +92,7 @@ class VarFontAssistant:
 
         y += self.lineHeight + p/2
         tab.designspaces = List(
-                (x, y, -p, self.lineHeight*5),
+                (x, y, -p, self.lineHeight*3),
                 [],
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
@@ -105,7 +105,7 @@ class VarFontAssistant:
                     callback=self.dropDesignspaceCallback),
                 )
 
-        y += self.lineHeight*5 + p
+        y += self.lineHeight*3 + p
         tab.axesLabel = TextBox(
                 (x, y, -p, self.lineHeight),
                 'axes')
@@ -113,7 +113,7 @@ class VarFontAssistant:
         y += self.lineHeight + p/2
         axesDescriptions = [{"title": D} for D in self._axesTitles]
         tab.axes = List(
-                (x, y, -p, self.lineHeight*5),
+                (x, y, -p, self.lineHeight*7),
                 [],
                 drawFocusRing=False,
                 editCallback=self.editAxesCallback,
@@ -125,7 +125,7 @@ class VarFontAssistant:
                 columnDescriptions=axesDescriptions,
             )
 
-        y += self.lineHeight*5 + p
+        y += self.lineHeight*7 + p
         tab.sourcesLabel = TextBox(
                 (x, y, -p, self.lineHeight),
                 'sources')
@@ -150,7 +150,7 @@ class VarFontAssistant:
 
         y += self.lineHeight + p/2
         tab.measurementFiles = List(
-                (x, y, -p, self.lineHeight*5),
+                (x, y, -p, self.lineHeight*3),
                 [],
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
@@ -163,13 +163,7 @@ class VarFontAssistant:
                     callback=self.dropMeasurementFileCallback),
                 )
 
-        y += self.lineHeight*5 + p
-
-        # tab.button = Button((x, y, -p, self.lineHeight),
-        #         "get measurements…",
-        #         # callback=self.buttonCallback,
-        #         )
-
+        y += self.lineHeight*3 + p
         tab.measurementsLabel = TextBox(
                 (x, y, col, self.lineHeight),
                 'measurements')
@@ -183,7 +177,7 @@ class VarFontAssistant:
                 selectionCallback=self.updateMeasurementsCallback,
             )
 
-        y = self.lineHeight*6 + p*2
+        y = self.lineHeight*4 + p*2
         tab.fontMeasurementsLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
                 'values')
@@ -219,7 +213,7 @@ class VarFontAssistant:
         tab.updateValues = Button(
                 (x, y, self.buttonWidth, self.lineHeight),
                 'load',
-                callback=self.loadFontValuesCallback,
+                callback=self.loadMeasurementsCallback,
             )
 
     def initializeFontValuesTab(self):
@@ -561,14 +555,14 @@ class VarFontAssistant:
         return selectedMeasurementFiles[0]
 
     @property
-    def selectedMeasurements(self):
+    def selectedMeasurement(self):
         tab = self._tabs['measurements']
         selection = tab.measurements.getSelection()
         measurements = tab.measurements.get()
         selectedMeasurements = [m for i, m in enumerate(measurements) if i in selection]
         if not len(selectedMeasurements):
             return
-        return selectedMeasurements
+        return selectedMeasurements[0]
 
     # glyph values
 
@@ -665,6 +659,7 @@ class VarFontAssistant:
             sourcesPosSize, sourcesItems,
             columnDescriptions=sourcesDescriptions,
             allowsMultipleSelection=True,
+            allowsSorting=False,
             enableDelete=False)
 
     def editAxesCallback(self, sender):
@@ -891,6 +886,36 @@ class VarFontAssistant:
 
         return True
 
+    def loadMeasurementsCallback(self, sender):
+
+        if not self.selectedSources:
+            return
+
+        tab = self._tabs['measurements']
+
+        # empty list
+        if not self.selectedDesignspace:
+            tab.fontMeasurements.set([])
+            return
+
+        # collect measurements into dict
+        measurementFilePath = self._measurementFiles[self.selectedMeasurementFile]
+        measurementTuples = importMeasurementDescriptionsFromCSV(measurementFilePath)
+
+        self._measurements = {}
+        for source in self.selectedSources:
+            sourceFileName = source['file name']
+            sourcePath = self._sources[sourceFileName]
+            f = OpenFont(sourcePath, showInterface=False)
+
+            self._measurements[sourceFileName] = {}
+            M = FontMeasurements(f, measurementTuples)
+            for key, measurement in M.measurements.items():
+                self._measurements[sourceFileName][key] = measurement.value
+            f.close()
+        
+        self.updateMeasurementsCallback(None)
+
     def selectMeasurementFileCallback(self, sender):
 
         tab = self._tabs['measurements']
@@ -906,53 +931,32 @@ class VarFontAssistant:
 
     def updateMeasurementsCallback(self, sender):
 
-        if not self.selectedMeasurements:
-            return
-
         tab = self._tabs['measurements']
 
-        # empty list
-        if not self.selectedMeasurements or not self.selectedSources:
+        if not self.selectedSources or not self._measurements:
             tab.fontMeasurements.set([])
             return
 
-        # collect measurements into dict
-        self._measurements = {}
+        measurementName = self.selectedMeasurement
 
-        measurementFilePath = self._measurementFiles[self.selectedMeasurementFile]
-        measurementTuples = importMeasurementDescriptionsFromCSV(measurementFilePath)
-
-        for source in self.selectedSources:
-            sourceFileName = source['file name']
-            sourcePath = self._sources[sourceFileName]
-
-            f = OpenFont(sourcePath, showInterface=False)
-            self._measurements[sourceFileName] = {}
-
-            for measurementTuple in measurementTuples:
-                if measurementTuple[0] not in self.selectedMeasurements:
-                    continue
-
-                M = Measurement(f, measurementTuple)
-                measurementKey = measurementTuple[0]
-                self._measurements[sourceFileName] = M.value
-
-            f.close()
+        if self.verbose:
+            print('updating font measurements...\n')
 
         # create list items
         values = []
-        valuesItems = []
-        for fontName, value in self._measurements.items():
+        measurementItems = []
+        for fontName in self._measurements.keys():
+            value = self._measurements[fontName][measurementName]
             listItem = {
                 "file name" : fontName,
                 "value"     : value,
                 "level"     : abs(value),
             }
-            valuesItems.append(listItem)
+            measurementItems.append(listItem)
             values.append(value)
 
         # set measurement values in table
-        valuesPosSize = tab.fontMeasurements.getPosSize()
+        fontMeasurementsPosSize = tab.fontMeasurements.getPosSize()
         del tab.fontMeasurements
 
         columnDescriptions  = [
@@ -973,8 +977,8 @@ class VarFontAssistant:
             },
         ]
         tab.fontMeasurements = List(
-                valuesPosSize,
-                valuesItems,
+                fontMeasurementsPosSize,
+                measurementItems,
                 allowsMultipleSelection=False,
                 allowsEmptySelection=False,
                 columnDescriptions=columnDescriptions,
@@ -1303,10 +1307,6 @@ class VarFontAssistant:
         pass
 
     def exportKerningCallback(self, sender):
-        '''
-        Export current kerning values as a CSV file.
-
-        '''
         pass
 
     def saveKerningCallback(self, sender):

@@ -1,0 +1,7 @@
+extensionName: VariableValues
+repository: https://github.com/gferreira/VariableValues
+extensionPath: VariableValues.roboFontExt
+description: A RoboFont extension to visualize and edit values in a designspace.
+developer: Gustavo Ferreira
+developerURL: https://github.com/gferreira
+tags: [variable fonts, font info, designspace, workflow]

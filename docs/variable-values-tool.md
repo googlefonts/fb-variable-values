@@ -57,7 +57,7 @@ measurements
 
 Collect custom measurements from the selected sources.
 
-![]({{ site.url }}/images/VariableValues-5.png){: .img-fluid}
+![]({{ site.url }}/images/VariableValues-3.png){: .img-fluid}
 
 measurement files
 : Drag one or more `.csv` files with measurement definitions from Finder into the list.

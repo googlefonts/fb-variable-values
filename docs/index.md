@@ -8,15 +8,13 @@ layout : default
 RoboFont extension to visualize, measure and edit values across designspace sources.
 {: .lead }
 
-{% comment %}
-## Topics
+## How-To’s
 
-- [Installation](install)
-{% endcomment %}
+- [Installing VariableValues](install)
 
 ## Reference
 
-- [Variable Values tool](variable-values-tool)
+- [VariableValues tool](variable-values-tool)
 
 - - -
 

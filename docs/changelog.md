@@ -37,7 +37,7 @@ types of changes:
 -----
 
 - <span class='badge'>Added</span> Adding `measurements` module to measure distances in a font. Based on [ParamaRoundup](http://github.com/FontBureau/Parama-roundup).
-- <span class='badge'>Added</span> Adding extension package for easy installation in RoboFont.
+- <span class='badge'>Added</span> Adding extension package and `.mechanic` file for easy installation in RoboFont.
 - <span class='badge'>Changed</span> Updating documentation content and stylesheet.
 
 0.1.0

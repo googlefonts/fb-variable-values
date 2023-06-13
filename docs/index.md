@@ -5,7 +5,7 @@ layout : default
 
 <span class='badge bg-secondary'>version {{ site.version }}</span>
 
-RoboFont extension to visualize, measure and edit values across designspace sources.
+RoboFont extension to view and edit values across designspace sources.
 {: .lead }
 
 ## How-To’s

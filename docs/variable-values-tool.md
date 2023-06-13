@@ -3,7 +3,7 @@ title  : VariableValues tool
 layout : default
 ---
 
-A tool to view and edit font values in multiple designspace sources at once.
+A tool to view and edit font values in multiple designspace sources.
 {: .lead}
 
 
@@ -28,7 +28,6 @@ sources
   *Select which sources to collect values from.*
 
 
-
 font values
 -----------
 
@@ -45,11 +44,10 @@ load
 values
 : ^
   Values and visualization of the selected font attribute across all selected sources.  
-  Double-click individual values to edit.
+  *Double-click individual values to edit.*
 
 save
 : Click the button to save the edited values back into the fonts.
-
 
 
 measurements
@@ -75,7 +73,6 @@ load
 : Click the button to collect values from the fonts and display them in the UI.
 
 
-
 glyph values
 ------------
 
@@ -99,7 +96,6 @@ values
 
 save
 : Click the button to save the edited values back into the fonts.
-
 
 
 kerning

@@ -1,7 +1,6 @@
 ---
-title  : Variable Values tool
+title  : VariableValues tool
 layout : default
-order  : 1
 ---
 
 A tool to view and edit font values in multiple designspace sources at once.

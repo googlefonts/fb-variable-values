@@ -10,7 +10,7 @@ RoboFont extension to visualize, measure and edit values across designspace sour
 
 ## How-To’s
 
-- [Installing VariableValues](install)
+- [Installation](install)
 
 ## Reference
 

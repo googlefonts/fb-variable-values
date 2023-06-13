@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>addToMenu</key>
+	<array>
+		<dict>
+			<key>path</key>
+			<string>variableValues/dialogs/varFontAssistant.py</string>
+			<key>preferredName</key>
+			<string>VariableValues</string>
+			<key>shortKey</key>
+			<string></string>
+		</dict>
+	</array>
+	<key>developer</key>
+	<string>Gustavo Ferreira</string>
+	<key>developerURL</key>
+	<string>http://hipertipo.com/</string>
+	<key>expireDate</key>
+	<string></string>
+	<key>html</key>
+	<false/>
+	<key>launchAtStartUp</key>
+	<true/>
+	<key>mainScript</key>
+	<string>start.py</string>
+	<key>name</key>
+	<string>VariableValues</string>
+	<key>requiresVersionMajor</key>
+	<string>3</string>
+	<key>requiresVersionMinor</key>
+	<string>4</string>
+	<key>timeStamp</key>
+	<real>1686653097.226037</real>
+	<key>version</key>
+	<string>0.1.1</string>
+</dict>
+</plist>

@@ -2,7 +2,6 @@
 title  : Changelog
 layout : default
 class  : changelog
-order  : 2
 ---
 
 All notable changes to VarTools are documented in this file.
@@ -33,6 +32,13 @@ types of changes:
 - `Security` in case of vulnerabilities.
 
 -->
+
+0.1.1
+-----
+
+- <span class='badge'>Added</span> Adding `measurements` module to measure distances in a font. Based on [ParamaRoundup](http://github.com/FontBureau/Parama-roundup).
+- <span class='badge'>Added</span> Adding extension package for easy installation in RoboFont.
+- <span class='badge'>Changed</span> Updating documentation content and stylesheet.
 
 0.1.0
 -----

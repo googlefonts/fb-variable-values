@@ -4,13 +4,13 @@ layout : default
 class  : changelog
 ---
 
-All notable changes to VarTools are documented in this file.
+All notable changes to VariableValues are documented in this file.
 {: .lead }
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-VarTools adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 <!--
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+VariableValues adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 semantic versioning: MAJOR.MINOR.PATCH
 see http://keepachangelog.com/
@@ -33,12 +33,14 @@ types of changes:
 
 -->
 
+
 0.1.1
 -----
 
 - <span class='badge'>Added</span> Adding `measurements` module to measure distances in a font. Based on [ParamaRoundup](http://github.com/FontBureau/Parama-roundup).
 - <span class='badge'>Added</span> Adding extension package and `.mechanic` file for easy installation in RoboFont.
 - <span class='badge'>Changed</span> Updating documentation content and stylesheet.
+
 
 0.1.0
 -----

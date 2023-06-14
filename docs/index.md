@@ -14,7 +14,8 @@ RoboFont extension to view and edit values across designspace sources.
 
 ## Reference
 
-- [VariableValues tool](variable-values-tool)
+- [VarFont Assistant](varfont-assistant)
+- [VarGlyph Assistant](varglyph-assistant)
 
 - - -
 

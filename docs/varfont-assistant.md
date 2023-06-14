@@ -1,5 +1,5 @@
 ---
-title  : VariableValues tool
+title  : VarFont Assistant
 layout : default
 ---
 
@@ -12,7 +12,7 @@ designspace
 
 Define which designspaces and font sources to look into.
 
-![]({{ site.url }}/images/VariableValues-1.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant-1.png){: .img-fluid}
 
 designspaces
 : Drag one or more designspace files into the list.
@@ -33,7 +33,7 @@ font values
 
 Visualize and edit font values in selected sources.
 
-![]({{ site.url }}/images/VariableValues-2.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant-2.png){: .img-fluid}
 
 attributes
 : A list of font attributes to collect values from.
@@ -55,7 +55,7 @@ measurements
 
 Collect custom measurements from the selected sources.
 
-![]({{ site.url }}/images/VariableValues-3.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant-3.png){: .img-fluid}
 
 measurement files
 : Drag one or more `.csv` files with measurement definitions from Finder into the list.
@@ -78,7 +78,7 @@ glyph values
 
 Visualize and edit glyph-level values.
 
-![]({{ site.url }}/images/VariableValues-4.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant-4.png){: .img-fluid}
 
 glyphs
 : A list of all glyphs in all selected sources.
@@ -103,7 +103,7 @@ kerning
 
 Visualize and edit kerning values in selected sources.
 
-![]({{ site.url }}/images/VariableValues-5.png){: .img-fluid}
+![]({{ site.url }}/images/VarFontAssistant-5.png){: .img-fluid}
 
 pairs
 : A list of all kerning pairs in all selected sources.

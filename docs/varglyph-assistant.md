@@ -65,7 +65,7 @@ compatibility
 
 ...
 
-![]({{ site.url }}/images/VarGlyphAssistant-3.png){: .img-fluid}
+![]({{ site.url }}/images/VarGlyphAssistant-4.png){: .img-fluid}
 
 glyphs
 : ...
@@ -82,7 +82,7 @@ relationships
 
 ...
 
-![]({{ site.url }}/images/VarGlyphAssistant-4.png){: .img-fluid}
+![]({{ site.url }}/images/VarGlyphAssistant-5.png){: .img-fluid}
 
 glyphs
 : ...

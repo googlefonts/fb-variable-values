@@ -35,6 +35,21 @@ glyphs
 
 ![]({{ site.url }}/images/VarGlyphAssistant-2.png){: .img-fluid}
 
+glyph name files
+: ...
+
+
+glyph names
+: ...
+
+
+attributes
+----------
+
+...
+
+![]({{ site.url }}/images/VarGlyphAssistant-3.png){: .img-fluid}
+
 glyphs
 : ...
 
@@ -62,8 +77,8 @@ load
 : ...
 
 
-validation
-----------
+relationships
+-------------
 
 ...
 
@@ -72,7 +87,10 @@ validation
 glyphs
 : ...
 
-tests
+test files
+: ...
+
+test results
 : ...
 
 load

@@ -11,7 +11,7 @@ from hTools3.modules.sys import pycClear, pyCacheClear, removeGitFiles
 version          = '0.1.1'
 baseFolder       = os.path.dirname(__file__)
 libFolder        = os.path.join(baseFolder, 'code', 'Lib')
-licensePath      = None # os.path.join(baseFolder, 'license.txt')
+licensePath      = os.path.join(baseFolder, 'LICENSE')
 resourcesFolder  = None # os.path.join(baseFolder, 'Resources')
 imagePath        = None # os.path.join(resourcesFolder, 'punch.png')
 
@@ -42,8 +42,8 @@ def buildExtension():
     B.requiresVersionMinor = '4'
     B.addToMenu = [
         {
-            'path'          : 'variableSpacing/dialogs/variableSpacingTool.py',
-            'preferredName' : 'Spacing States',
+            'path'          : 'variableValues/dialogs/varFontAssistant.py',
+            'preferredName' : 'VariableValues',
             'shortKey'      : '',
         },
     ]

@@ -1,6 +1,7 @@
 import AppKit
 import os, sys
 from vanilla import  Window, EditText, TextBox, Box, List, Button, Tabs, LevelIndicatorListCell
+from defconAppKit.controls.glyphCollectionView import GlyphCollectionView
 from mojo.roboFont import OpenWindow
 from variableValues.dialogs.base import DesignSpaceSelector
 
@@ -33,7 +34,7 @@ class VarGlyphAssistant(DesignSpaceSelector):
     _colFontName  = 240
     _colValue     = 80
 
-    _tabsTitles   = ['designspace', 'glyphs', 'attributes', 'compatibility', 'validation']
+    _tabsTitles   = ['designspace', 'glyphs', 'attributes', 'compatibility', 'relationships']
 
     _glyphAttrs       = {}
     _glyphAttrsLabels = [
@@ -56,12 +57,9 @@ class VarGlyphAssistant(DesignSpaceSelector):
     ]
     _glyphTests = [
         'is centered',
-        'is compatible',
-        'match width',
         'match left',
         'match right',
-        'match anchors',
-        'match components',
+        'match width',
     ]
 
     def __init__(self):
@@ -89,14 +87,44 @@ class VarGlyphAssistant(DesignSpaceSelector):
 
         x = p = self.padding
         y = p/2
-        tab.glyphsLabel = TextBox(
+        tab.glyphNameFilesLabel = TextBox(
                 (x, y, -p, self.lineHeight),
-                'glyphs')
+                'glyph name files')
+
+        y += self.lineHeight + p/2
+        tab.glyphNameFiles = List(
+                (x, y, -p, self.lineHeight*5),
+                [],
+                allowsMultipleSelection=False,
+                allowsEmptySelection=False,
+                # selectionCallback=self.selectGlyphAttrsCallback,
+            )
+
+        y += self.lineHeight*5 + p
+        tab.glyphsNamesLabel = TextBox(
+                (x, y, -p, self.lineHeight),
+                'glyph names')
 
         y += self.lineHeight + p/2
         tab.glyphNames = EditText(
-                (x, y, -p, self.lineHeight*5),
+                (x, y, -p, -self.lineHeight-p*2),
                 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z',
+            )
+
+        # tab.glyphs = GlyphCollectionView((x, y, -p, -self.lineHeight -p*2),
+        #     # allowDrag=True,
+        #     # selectionCallback=self.collectionViewSelectionCallback,
+        #     # doubleClickCallback=self.collectionViewDoubleClickCallback,
+        #     # deleteCallback=self.collectionViewDeleteCallback,
+        #     # selfDropSettings=selfDropSettings,
+        #     # selfApplicationDropSettings=dropSettings
+        # )
+
+        y = -(self.lineHeight + p)
+        tab.updateGlyphs = Button(
+                (x, y, self.buttonWidth, self.lineHeight),
+                'load',
+                # callback=self.updateMeasurementsCallback,
             )
 
     def initializeAttributesTab(self):
@@ -185,7 +213,7 @@ class VarGlyphAssistant(DesignSpaceSelector):
 
     def initializeValidationTab(self):
 
-        tab = self._tabs['validation']
+        tab = self._tabs['relationships']
 
         x = p = self.padding
         y = p/2
@@ -205,33 +233,29 @@ class VarGlyphAssistant(DesignSpaceSelector):
         x2 = x + self._colGlyphs + p
         tab.testsLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'tests')
+                'test files')
 
         y += self.lineHeight + p/2
-        testItems = []
-        for test in self._glyphTests:
-            testItem = { 'Name' : test }
-            for L in self._glyphTestsLabels[1:]:
-                testItem[L] = ''
-            testItems.append(testItem)
         tab.tests = List(
-                (x2, y, -p, self.lineHeight*8),
-                testItems,
+                (x2, y, -p, self.lineHeight*5),
+                [], # testItems,
                 allowsMultipleSelection=True,
                 allowsEmptySelection=False,
-                columnDescriptions=[{"title": t} for t in self._glyphTestsLabels],
+                # columnDescriptions=[{"title": t} for t in self._glyphTestsLabels],
             )
 
-        y += self.lineHeight*8 + p
+        y += self.lineHeight*5 + p
         tab.resultsLabel = TextBox(
                 (x2, y, -p, self.lineHeight),
-                'results')
+                'test results')
 
         y += self.lineHeight + p/2
+        _columnDescriptions  = [{"title": t, 'minWidth': self._colFontName, 'width': self._colFontName*1.5} for t in ['file name']]
+        _columnDescriptions += [{"title": t, 'width': self._colValue} for t in self._glyphTests]
         tab.results = List(
                 (x2, y, -p, -(self.lineHeight + p*2)),
                 [],
-                columnDescriptions=[{"title": t} for t in ['file name'] + self._glyphTests],
+                columnDescriptions=_columnDescriptions,
             )
 
         y = -(self.lineHeight + p)
